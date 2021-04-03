@@ -1,0 +1,7 @@
+"main.obj",
+"AMPIRE128X64.obj",
+"DS18B20.obj",
+"DS1302.obj",
+"FM24C64.obj" 
+TO "WENDU" 
+RAMSIZE(256) 

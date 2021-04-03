@@ -1,0 +1,140 @@
+A51 MACRO ASSEMBLER  T                                                                    07/09/2011 14:10:01 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.01
+OBJECT MODULE PLACED IN t.OBJ
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE t.a51 SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1             ORG 0000H
+0000 020100            2             LJMP ST
+001B                   3             ORG 001BH
+001B 020186            4             LJMP TIME1
+0100                   5             ORG 0100H
+0100                   6     ST:
+0100 758910            7             MOV TMOD,#10H
+0103 D2AF              8             SETB EA
+0105 D2AB              9             SETB ET1
+0107 900133           10             MOV DPTR,#TAB
+010A                  11     LOOP:
+010A E4               12             CLR A
+010B 93               13             MOVC A,@A+DPTR
+010C F9               14             MOV R1,A
+010D A3               15             INC DPTR
+010E E4               16             CLR A
+010F 93               17             MOVC A,@A+DPTR
+0110 F8               18             MOV R0,A
+0111 49               19             ORL A,R1
+0112 600F             20             JZ XZF;;;;;;
+0114 E8               21             MOV A,R0
+0115 59               22             ANL A,R1
+0116 B4FF02           23             CJNE A,#0FFH,NEXT
+0119 80E5             24             SJMP ST
+                      25             ;;;;
+011B                  26     NEXT:
+011B 898D             27             MOV TH1,R1
+011D 888B             28             MOV TL1,R0
+011F D28E             29             SETB TR1
+0121 8002             30             SJMP NEXT1
+                      31             ;;;
+0123                  32     XZF:
+0123 C28E             33             CLR TR1
+0125                  34     NEXT1:
+0125 E4               35             CLR A
+0126 A3               36             INC DPTR
+0127 93               37             MOVC A,@A+DPTR
+0128 FA               38             MOV R2,A
+0129 D28E             39             SETB TR1
+012B                  40     LOOP1:
+012B 12018D           41             LCALL D130
+012E DAFB             42             DJNZ R2,LOOP1
+0130 A3               43             INC DPTR
+0131 210A             44             AJMP LOOP
+                      45             ;;;;
+                      46     
+                      47     
+                      48     ;;;;;;;;;;;;;;
+0133                  49     TAB:
+0133 FB0804           50     DB 0FBH,08H,04H
+0136 FD8004           51             DB 0FDH,80H,04H
+0139 FCAE03           52             DB 0FCH,0AEH,03H
+013C FD0801           53             DB 0FDH,08H,01H
+013F FD3004           54             DB 0FDH,30H,04H
+0142 FD0802           55             DB 0FDH,08H,02H
+0145 FB8C01           56             DB 0FBH,8CH,01H
+0148 FD0802           57             DB 0FDH,08H,02H
+014B FCAE01           58             DB 0FCH,0AEH,01H
+A51 MACRO ASSEMBLER  T                                                                    07/09/2011 14:10:01 PAGE     2
+
+014E FC4A01           59             DB 0FCH,4AH,01H
+0151 FC0E01           60             DB 0FCH,0EH,01H
+0154 FC4A01           61             DB 0FCH,4AH,01H
+0157 FCAE04           62             DB 0FCH,0AEH,04H
+015A FB0004           63             DB 0FBH,00H,04H
+015D FD0804           64             DB 0FDH,08H,04H
+0160 FD8004           65             DB 0FDH,80H,04H
+0163 FCAE03           66             DB 0FCH,0AEH,03H
+0166 FD0801           67             DB 0FDH,08H,01H
+0169 FD3004           68             DB 0FDH,30H,04H
+016C FD0802           69             DB 0FDH,08H,02H
+016F FB8C01           70         DB 0FBH,8CH,01H
+0172 FD0802           71             DB 0FDH,08H,02H
+0175 FCAE01           72             DB 0FCH,0AEH,01H
+0178 FD0801           73             DB 0FDH,08H,01H
+017B FD3001           74             DB 0FDH,30H,01H
+017E FCAE01           75             DB 0FCH,0AEH,01H
+0181 FC4A04           76             DB 0FCH,4AH,04H
+0184 FFFF             77             DB 0FFH,0FFH
+                      78     
+                      79     
+                      80     ;;;;;;;;;;;;;;
+0186                  81     TIME1:
+0186 898D             82             MOV TH1,R1
+0188 888B             83             MOV TL1,R0
+018A B2B7             84             CPL P3.7
+018C 32               85             RETI
+                      86     ;;;;;;;;;;;;;;
+018D                  87     D130:
+018D 7DA0             88             MOV R5,#160
+018F                  89     DEL0:
+018F 7CC8             90             MOV R4,#200
+0191                  91     DEL1:
+0191 00               92             NOP
+0192 00               93             NOP
+0193 DCFC             94             DJNZ R4,DEL1
+0195 DDF8             95             DJNZ R5,DEL0
+0197 22               96             RET
+                      97             END
+A51 MACRO ASSEMBLER  T                                                                    07/09/2011 14:10:01 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+D130 . . . . . . .  C ADDR   018DH   A   
+DEL0 . . . . . . .  C ADDR   018FH   A   
+DEL1 . . . . . . .  C ADDR   0191H   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+ET1. . . . . . . .  B ADDR   00A8H.3 A   
+LOOP . . . . . . .  C ADDR   010AH   A   
+LOOP1. . . . . . .  C ADDR   012BH   A   
+NEXT . . . . . . .  C ADDR   011BH   A   
+NEXT1. . . . . . .  C ADDR   0125H   A   
+P3 . . . . . . . .  D ADDR   00B0H   A   
+ST . . . . . . . .  C ADDR   0100H   A   
+TAB. . . . . . . .  C ADDR   0133H   A   
+TH1. . . . . . . .  D ADDR   008DH   A   
+TIME1. . . . . . .  C ADDR   0186H   A   
+TL1. . . . . . . .  D ADDR   008BH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR1. . . . . . . .  B ADDR   0088H.6 A   
+XZF. . . . . . . .  C ADDR   0123H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

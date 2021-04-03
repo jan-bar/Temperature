@@ -1,0 +1,2557 @@
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02
+OBJECT MODULE PLACED IN main.OBJ
+ASSEMBLER INVOKED BY: E:\Program Files\danpianji\Keil\C51\BIN\A51.EXE main.a51 SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     EXTRN CODE(SET_LINE,DISPLAY_BMP,DISPLAY_LCD,CLEAR_SCREEN,INIT_LCD,SELECT_SCREEN)
+                       2     EXTRN CODE(DS1302_INIT,GET1302)
+                       3     EXTRN CODE(START,STOP,WAITACK,SENDBYTE,RCVBYTE,WRITE_BYTE,READ_BYTE)
+                       4     EXTRN CODE(HEX_BCD,READ_TEMP)
+                       5     ;;;;;;;;;;;;;;;;;;;;;;;;LCD12864
+  00A2                 6     LCD_RS          BIT                     P2.2
+  00A1                 7     LCD_RW          BIT                     P2.1
+  00A0                 8     LCD_E           BIT                     P2.0
+  00A4                 9     LCD_CS1         BIT                     P2.4    ;µÍµçÆ½ÓÐÐ§£¬×ó°ëÆÁ
+  00A3                10     LCD_CS2         BIT                     P2.3    ;µÍµçÆ½ÓÐÐ§£¬ÓÒ°ëÆÁ
+                      11     ;;;;;;;;;;;;;;;;;;;;;;;;DS1302
+  0093                12     T_CLK           BIT             P1.3
+  0094                13     T_IO            BIT             P1.4
+  0092                14     T_RST           BIT             P1.2
+  0030                15     SECOND          EQU             30H
+  0031                16     MINUTE          EQU             31H
+  0032                17     HOUR            EQU             32H
+  0033                18     DAY                     EQU                     33H
+  0034                19     MONTH           EQU             34H
+  0035                20     WEEK            EQU             35H
+  0036                21     YEAR            EQU             36H
+                      22     ;;;;;;;;;;;;;;;;;;;;;;;;24C64
+  0090                23     SCL                     BIT                     P1.0
+  0091                24     SDA                     BIT                     P1.1
+  0037                25     SLA                     EQU                     37H
+  0038                26     SUBA            EQU                     38H
+  0039                27     MTD                     EQU                     39H
+  003A                28     MRD                     EQU                     3AH
+                      29     ;;;;;;;;;;;;;;;;;;;;;;;;18B20
+  003B                30     TEMP_ZH         EQU                     3BH                      ;Êµ¼ÊÎÂ¶ÈÖµ´æ·Åµ¥Ôª£¬ÓÃÀ´º
+                             Í±¨¾¯ÎÂ¶ÈÖµ±È½Ï
+  003C                31     TEMPL           EQU                     3CH                      ;ÎÂ¶ÈÖµµÍÎ»
+  003D                32     TEMPH           EQU                     3DH                      ;ÎÂ¶ÈÖµ¸ßÎ»
+  003E                33     TEMP_TH         EQU                     3EH                      ;¸ßÎÂ±¨¾¯Öµ£¬ÄÚ²¿ÃüÁîÊ±ÓÃ
+  003F                34     TEMP_TL         EQU                     3FH                      ;µÍÎÂ±¨¾¯Öµ£¬ÄÚ²¿ÃüÁîÊ±ÓÃ
+  0000                35     FLAG            BIT                     20H.0            ;DS18B20ÊÇ·ñ´æÔÚ±ê¼Ç
+  0095                36     DQ                      BIT                     P1.5             ;DS18B20Ê¾Ý½Å¶¨Òå
+  0040                37     TEMPHC          EQU                     40H                      ;ÎÂ¶È×ª»»µÍ8Î» 
+  0041                38     TEMPLC          EQU                     41H                      ;ÎÂ¶È×ª»»¸ß8Î»
+  0042                39     CONUT_DS        EQU                     42H                      ;¶¨ÒåÎÂ¶È²É¼¯Ê±¼ä
+  0043                40     TEMPHH1         EQU                     43H                      ;µÚÒ»¸öÎÂ¶È¼ÆµÄ¸ßÎÂÔ¤¾¯
+  0044                41     TEMPLL1         EQU                     44H                      ;µÚÒ»¸öÎÂ¶È¼ÆµÄµÍÎÂÔ¤¾¯
+  0045                42     TEMPHH2         EQU                     45H                      ;µÚ¶þ¸öÎÂ¶È¼ÆµÄ¸ßÎÂÔ¤¾¯
+  0046                43     TEMPLL2         EQU                     46H                      ;µÚ¶þ¸öÎÂ¶È¼ÆµÄµÍÎÂÔ¤¾¯
+  0047                44     TEMP_LED        EQU                     47H                      ;±¨¾¯µÆÁÁÃð¿ØÖÆ
+  0048                45     MUSIC0          EQU                     48H
+  0049                46     MUSIC1          EQU                     49H
+  0050                47     CONUT_ALARM     EQU                     50H
+                      48     ;;;;;;;;;;;;;;;;;;;;;;;;°´¼ü¶¨Òå
+  00A5                49     SELECT          BIT                     P2.5
+  00A6                50     OK                      BIT                     P2.6
+  00A7                51     KADD            BIT                     P2.7
+  0096                52     KDEC            BIT                     P1.6
+  0097                53     SPEALER         BIT                     P1.7
+  00B5                54     KOK                     BIT                     P3.5
+                      55     ;;;;;;;;;;;;;;;;;;;;;;;;
+0000                  56             ORG     0000H
+0000 020030           57             LJMP    MAIN0
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE     2
+
+0003                  58             ORG             0003H
+0003 0202D5           59             LJMP    INT0P
+0013                  60             ORG             0013H
+0013 02047C           61             LJMP    INT1P
+000B                  62             ORG     000BH
+000B 0202C3           63             LJMP    TIME1
+0030                  64             ORG             0030H
+0030                  65     MAIN0:
+                      66     ;;;;;;;;;;;;;;;;;;;;;;;;
+0030 758150           67                                     MOV             SP,#50H         ;¶ÑÕ»³õÊ¼»¯
+0033 75A887           68                                     MOV             IE,#87H         ;¿ªÖÐ¶Ï£¬T0ºÍINT0
+0036 D288             69                                     SETB    IT0                     ;ÉèINT0ÏÂ½µÑØ´¥·¢
+0038 D28A             70                                     SETB    IT1                     ;ÉèINT1ÏÂ½µÑØ´¥·¢
+003A 758901           71                                     MOV     TMOD,#01H
+003D 759800           72                                     MOV             SCON,#0         ;´®¿Ú¹¤×÷ÔÚ·½Ê½0
+0040 758700           73                                     MOV             PCON,#0
+                      74                                     ;;;;;;;
+0043 7450             75                                     MOV             A,#80           ;Éè¸ßÎÂ80¶È±¨¾¯£¬¿É¸ü¸Ä
+0045 F543             76                                     MOV             TEMPHH1,A
+0047 F545             77                                     MOV             TEMPHH2,A
+0049 7419             78                                     MOV             A,#25           ;ÉèµÍÎÂ-25¶È±¨¾¯£¬¿É¸ü¸Ä,×¢
+                             Òâ
+                      79                                     ;;;;ÎÂ¶È´æ´¢Ê±Ã»ÓÐ´øÉÏ·ûºÅÎ»£¬±È½Ï´óÐ¡Ê±Òª×¢Òâ
+004B F544             80                                     MOV             TEMPLL1,A
+004D F546             81                                     MOV             TEMPLL2,A
+                      82                                     ;;;;;;
+                      83                                     ;ÒÔR2À´¼ÇÂ¼ËùÁÁµÄµÆµÄÐÅÏ¢
+004F 754700           84                                     MOV             TEMP_LED,#0
+                      85                                     ;;;;;;;;ÆðÊ¼Îª0£¬Èç¹ûÓÐÐèÒªÁÁµÄµÈ¾ÍORLÄÇÒ»Î»
+0052 120000   F       86                                     LCALL   DS1302_INIT     ;³õÊ¼»¯DS1302
+0055 120769           87                                     LCALL   LCD_MOD1        ;ÏÔÊ¾MOD1·½Ê½LCD
+0058 755001           88                                     MOV             CONUT_ALARM,#1
+                      89     
+005B                  90     SMAIN:                  
+005B 120829           91                                     LCALL   DISP_1302_LCD;ÏÔÊ¾Ê±¼äÖµµ½LCD
+005E 120614           92                                     LCALL   DS18B20_TEMP  ;ÏÔÊ¾ÎÂ¶ÈÖµ
+0061 D55006           93                                     DJNZ    CONUT_ALARM,ALARM_OK
+0064 12006D           94                                     LCALL   ALARM             ;¹ÎÂ±¨¾¯
+0067 755001           95                                     MOV             CONUT_ALARM,#1
+006A                  96     ALARM_OK:               
+006A 02005B           97                                     LJMP    SMAIN
+                      98     ;;;;;;;;;;;;;;;;;;;;;;;;ÎÂ¶È±¨¾¯³ÌÐò
+006D                  99     ALARM:                  
+                     100     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+006D 7F01            101                                     MOV             R7,#1
+006F 120000   F      102                                     LCALL   READ_TEMP
+0072 120000   F      103                                     LCALL   READ_TEMP       ;¶ÁµÚÒ»¸öÎÂ¶ÈµÄÖµ
+0075 E540            104                                     MOV             A,TEMPHC
+0077 54F0            105                                     ANL             A,#0F0H
+0079 B4000A          106                                     CJNE    A,#00H,ALARM_ZHENG1
+007C E53B            107                                     MOV             A,TEMP_ZH       ;A½ÓÊÕÊµ¼ÊÎÂ¶ÈÖµ£¬Ê®Áù½øÖÆµ
+                             ÄÊ
+007E 9544            108                                     SUBB    A,TEMPLL1
+0080 30E720          109                                     JNB             ACC.7,LLALARM1  ;µÍÎÂ¾¯±¨
+0083 0200B5          110                                     LJMP    ANQUAN1                 ;°²È«×´Ì¬
+0086                 111     ALARM_ZHENG1:   ;;;;;;;;;
+0086 E53B            112                                     MOV             A,TEMP_ZH       ;A½ÓÊÕÊµ¼ÊÎÂ¶ÈÖµ£¬Ê®Áù½øÖÆµ
+                             ÄÊ
+0088 9543            113                                     SUBB    A,TEMPHH1
+008A 30E703          114                                     JNB             ACC.7,HHALARM1  ;¸ßÎÂ¾¯±¨
+008D 0200B5          115                                     LJMP    ANQUAN1                 ;°²È«×´Ì¬
+                     116     ;;;;;;;;;;;;;;;;;;;
+0090 E547            117     HHALARM1:               MOV             A,TEMP_LED
+0092 4401            118                                     ORL             A,#01H
+0094 54FD            119                                     ANL             A,#0FDH         ;±£Ö¤ÁÁ¸ßÎÂµÄÄÇÒ»Õµ
+0096 F547            120                                     MOV             TEMP_LED,A
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE     3
+
+0098 F599            121                                     MOV             SBUF,A             ;´«ËÍµ±Ç°ÁÁµÄµÆ
+009A 109903          122     HLOP1:                  JBC             TI,HK1
+009D 02009A          123                                     LJMP    HLOP1
+00A0                 124     HK1:                    
+00A0 0200C3          125                                     LJMP    ALARM_END1
+                     126     ;;;;;;;;;;;;;;;;;;
+00A3 E547            127     LLALARM1:           MOV         A,TEMP_LED
+00A5 4402            128                                     ORL             A,#02H
+00A7 54FE            129                                     ANL             A,#0FEH         ;±£Ö¤ÁÁµÍÎÂÄÇÒ»Õµ
+00A9 F547            130                                     MOV             TEMP_LED,A
+00AB F599            131                                     MOV             SBUF,A             ;´«ËÍµ±Ç°ÁÁµÄµÆ
+00AD 109902          132     LLOP1:                  JBC             TI,LK1
+00B0 01AD            133                                     AJMP    LLOP1
+00B2                 134     LK1:
+00B2 0200C3          135                                     LJMP    ALARM_END1
+                     136     ;;;;;;;;;;;;;;;;;;
+00B5                 137     ANQUAN1:                ;;;;;
+00B5 E547            138                                     MOV             A,TEMP_LED
+00B7 54FC            139                                     ANL             A,#0FCH         ;1°²È«Ê±ÃðËü¶ÔÓ¦µÄµÆ
+00B9 F547            140                                     MOV             TEMP_LED,A
+00BB F599            141                                     MOV             SBUF,A             ;´«ËÍµ±Ç°ÁÁµÄµÆ
+00BD 109903          142     ALOP1:                  JBC             TI,AK1
+00C0 0200BD          143                                     LJMP    ALOP1
+00C3                 144     AK1:
+                     145     
+00C3                 146     ALARM_END1:
+                     147     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00C3 7F02            148                                     MOV             R7,#2
+00C5 120000   F      149                                     LCALL   READ_TEMP
+00C8 120000   F      150                                     LCALL   READ_TEMP       ;¶ÁµÚ¶þ¸öÎÂ¶ÈµÄÖµ
+00CB E540            151                                     MOV             A,TEMPHC
+00CD 54F0            152                                     ANL             A,#0F0H
+00CF B4000A          153                                     CJNE    A,#00H,ALARM_ZHENG2
+00D2 E53B            154                                     MOV             A,TEMP_ZH       ;A½ÓÊÕÊµ¼ÊÎÂ¶ÈÖµ£¬Ê®Áù½øÖÆµ
+                             ÄÊ
+00D4 9546            155                                     SUBB    A,TEMPLL2
+00D6 30E720          156                                     JNB             ACC.7,LLALARM2  ;µÍÎÂ¾¯±¨
+00D9 02010C          157                                     LJMP    ANQUAN2                 ;°²È«×´Ì¬
+00DC                 158     ALARM_ZHENG2:   ;;;;;;;;;
+00DC E53B            159                                     MOV             A,TEMP_ZH       ;A½ÓÊÕÊµ¼ÊÎÂ¶ÈÖµ£¬Ê®Áù½øÖÆµ
+                             ÄÊ
+00DE 9545            160                                     SUBB    A,TEMPHH2
+00E0 30E703          161                                     JNB             ACC.7,HHALARM2  ;¸ßÎÂ¾¯±¨
+00E3 02010C          162                                     LJMP    ANQUAN2                 ;°²È«×´Ì¬
+                     163     ;;;;;;;;;;;;;;;;;;;
+00E6 E547            164     HHALARM2:               MOV             A,TEMP_LED
+00E8 4404            165                                     ORL             A,#04H
+00EA 54F7            166                                     ANL             A,#0F7H         ;±£Ö¤ÁÁ¸ßÎÂµÄÄÇÒ»Õµ
+00EC F547            167                                     MOV             TEMP_LED,A
+00EE F599            168                                     MOV             SBUF,A             ;´«ËÍµ±Ç°ÁÁµÄµÆ
+00F0 109903          169     HLOP2:                  JBC             TI,HK2
+00F3 0200F0          170                                     LJMP    HLOP2
+00F6                 171     HK2:
+00F6 02011A          172                                     LJMP    ALARM_END
+                     173     ;;;;;;;;;;;;;;;;;;
+00F9 E547            174     LLALARM2:           MOV         A,TEMP_LED
+00FB 4408            175                                     ORL             A,#08H
+00FD 54FB            176                                     ANL             A,#0FBH         ;±£Ö¤ÁÁµÍÎÂÄÇÒ»Õµ
+00FF F547            177                                     MOV             TEMP_LED,A
+0101 F599            178                                     MOV             SBUF,A             ;´«ËÍµ±Ç°ÁÁµÄµÆ
+0103 109903          179     LLOP2:                  JBC             TI,LK2
+0106 020103          180                                     LJMP    LLOP2
+0109                 181     LK2:
+0109 02011A          182                                     LJMP    ALARM_END
+                     183     ;;;;;;;;;;;;;;;;;;
+010C                 184     ANQUAN2:                ;;;;;
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE     4
+
+010C E547            185                                     MOV             A,TEMP_LED
+010E 54F3            186                                     ANL             A,#0F3H         ;1°²È«Ê±ÃðËü¶ÔÓ¦µÄµÆ
+0110 F547            187                                     MOV             TEMP_LED,A
+0112 F599            188                                     MOV             SBUF,A             ;´«ËÍµ±Ç°ÁÁµÄµÆ
+0114 109903          189     ALOP2:                  JBC             TI,AK2
+0117 020114          190                                     LJMP    ALOP2
+011A                 191     AK2:
+                     192                                     
+011A                 193     ALARM_END:              
+011A E547            194                                     MOV             A,TEMP_LED
+011C 540F            195                                     ANL             A,#0FH
+011E 6047            196                                     JZ              QANQUAN                 ;È«²¿¶¼°²È«
+0120 E547            197                                     MOV             A,TEMP_LED
+0122 30D028          198                                     JNB             PSW.0,HLWEN             ;ÓÐÅ¼Ê¸ö1£¬ÔòµÍÎÂ¸ß
+                             ÎÂ¶¼ÓÐ
+0125 E547            199                                     MOV             A,TEMP_LED
+0127 5405            200                                     ANL             A,#05H
+0129 6011            201                                     JZ              DIWEN                           ;AµÈÓÚÁãÔòÊ
+                             ÇµÍÎÂ
+012B 900197          202                                     MOV             DPTR,#TAB_GAO           ;¸ßÎÂ±í
+012E 858248          203                                     MOV             MUSIC0,DPL
+0131 858349          204                                     MOV             MUSIC1,DPH
+0134 900BA8          205                                     MOV             DPTR,#TAB_HOT
+0137 120000   F      206                                     LCALL   DISPLAY_BMP
+013A 215C            207                                     AJMP    WEN_END
+013C 9001F3          208     DIWEN:                  MOV             DPTR,#TAB_DI            ;µÍÎÂ±í
+013F 858248          209                                     MOV             MUSIC0,DPL
+0142 858349          210                                     MOV             MUSIC1,DPH
+0145 900FA8          211                                     MOV             DPTR,#TAB_COLD
+0148 120000   F      212                                     LCALL   DISPLAY_BMP
+014B 215C            213                                     AJMP    WEN_END
+014D 900270          214     HLWEN:                  MOV             DPTR,#TAB_GAO_DI        ;¸ßµÍÎÂ¶¼ÓÐ
+0150 858248          215                                     MOV             MUSIC0,DPL
+0153 858349          216                                     MOV             MUSIC1,DPH
+0156 9013A8          217                                     MOV             DPTR,#TAB_H_C
+0159 120000   F      218                                     LCALL   DISPLAY_BMP
+015C                 219     WEN_END:
+                     220                                     
+015C D083            221                                     POP             DPH
+015E D082            222                                     POP             DPL
+0160 900168          223                                     MOV             DPTR,#ALARM_MUSIC
+0163 C082            224                                     PUSH    DPL
+0165 C083            225                                     PUSH    DPH
+                     226     
+0167                 227     QANQUAN:                                
+0167 22              228                                     RET
+                     229     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;ÒôÀÖ¶Î³ÌÐò
+0168                 230     ALARM_MUSIC: 
+0168 854983          231                                     MOV             DPH,MUSIC1
+016B 854882          232                                     MOV             DPL,MUSIC0
+016E                 233     LOOP:                   
+                     234                                     
+016E E4              235                                     CLR A
+016F 93              236                                     MOVC A,@A+DPTR
+0170 F9              237                                     MOV R1,A
+0171 A3              238                                     INC DPTR
+0172 E4              239                                     CLR A
+0173 93              240                                     MOVC A,@A+DPTR
+0174 F8              241                                     MOV R0,A
+0175 49              242                                     ORL A,R1
+0176 600F            243                                     JZ XZF;;;;;;
+0178 E8              244                                     MOV A,R0
+0179 59              245                                     ANL A,R1
+017A B4FF02          246                                     CJNE A,#0FFH,NEXT
+017D 2168            247                                     AJMP ALARM_MUSIC
+                     248             ;;;;
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE     5
+
+017F                 249     NEXT:
+017F 898C            250                                     MOV TH0,R1
+0181 888A            251                                     MOV TL0,R0
+0183 D28C            252                                     SETB TR0
+0185 8002            253                                     SJMP NEXT1
+                     254             ;;;
+0187                 255     XZF:
+0187 C28C            256                                     CLR TR0
+0189                 257     NEXT1:
+0189 E4              258                                     CLR A
+018A A3              259                                     INC DPTR
+018B 93              260                                     MOVC A,@A+DPTR
+018C FA              261                                     MOV R2,A
+018D D28C            262                                     SETB TR0
+018F                 263     LOOP1:
+018F 1202CA          264                                     LCALL D130
+0192 DAFB            265                                     DJNZ R2,LOOP1
+0194 A3              266                                     INC DPTR
+0195 216E            267                                     AJMP LOOP
+                     268     
+                     269     ;;;;;;;;;;;;;;
+0197                 270     TAB_GAO:
+0197 FD0804          271     DB              0FDH,08H,04H
+019A FD0804          272     DB              0FDH,08H,04H
+019D FD3004          273     DB              0FDH,30H,04H
+01A0 FD8004          274     DB              0FDH,80H,04H
+01A3 FD8004          275     DB              0FDH,80H,04H
+01A6 FD3004          276     DB              0FDH,30H,04H
+01A9 FD0804          277     DB              0FDH,08H,04H
+01AC FCAE04          278     DB              0FCH,0AEH,04H
+01AF FC4A04          279     DB              0FCH,4AH,04H
+01B2 FC4A04          280     DB              0FCH,4AH,04H
+01B5 FCAE04          281     DB              0FCH,0AEH,04H
+01B8 FD0804          282     DB              0FDH,08H,04H
+01BB FD0806          283     DB              0FDH,08H,06H
+01BE FCAE02          284     DB              0FCH,0AEH,02H
+01C1 FCAE08          285     DB              0FCH,0AEH,08H
+01C4 FD0804          286     DB              0FDH,08H,04H
+01C7 FD0804          287     DB              0FDH,08H,04H
+01CA FD3004          288     DB              0FDH,30H,04H
+01CD FD8004          289     DB              0FDH,80H,04H
+01D0 FD8004          290     DB              0FDH,80H,04H
+01D3 FD3004          291     DB              0FDH,30H,04H
+01D6 FD0804          292     DB              0FDH,08H,04H
+01D9 FCAE04          293     DB              0FCH,0AEH,04H
+01DC FC4A04          294     DB              0FCH,4AH,04H
+01DF FC4A04          295     DB              0FCH,4AH,04H
+01E2 FCAE04          296     DB              0FCH,0AEH,04H
+01E5 FD0804          297     DB              0FDH,08H,04H
+01E8 FCAE06          298     DB              0FCH,0AEH,06H
+01EB FC4A02          299     DB      0FCH,4AH,02H
+01EE FC4A08          300     DB      0FCH,4AH,08H
+01F1 FFFF            301     DB      0FFH,0FFH
+01F3                 302     TAB_DI:
+01F3 FD8004          303     DB              0FDH,80H,04H
+01F6 FDC604          304     DB              0FDH,0C6H,04H
+01F9 FE2A04          305     DB              0FEH,2AH,04H
+01FC FE5C02          306     DB              0FEH,5CH,02H
+01FF FDC602          307     DB              0FDH,0C6H,02H
+0202 FDC610          308     DB              0FDH,0C6H,10H
+0205 FE8404          309     DB              0FEH,84H,04H
+0208 FE5C04          310     DB              0FEH,5CH,04H
+020B FE8402          311     DB              0FEH,84H,02H
+020E FE5C02          312     DB              0FEH,5CH,02H
+0211 FE2A02          313     DB              0FEH,2AH,02H
+0214 FD8002          314     DB              0FDH,80H,02H
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE     6
+
+0217 FDC610          315     DB              0FDH,0C6H,10H
+021A FD8004          316     DB              0FDH,80H,04H
+021D FDC604          317     DB              0FDH,0C6H,04H
+0220 FE2A04          318     DB              0FEH,2AH,04H
+0223 FE5C02          319     DB              0FEH,5CH,02H
+0226 FDC602          320     DB              0FDH,0C6H,02H
+0229 FDC610          321     DB              0FDH,0C6H,10H
+022C FE8404          322     DB              0FEH,84H,04H
+022F FE5C04          323     DB              0FEH,5CH,04H
+0232 FE8402          324     DB              0FEH,84H,02H
+0235 FE5C02          325     DB              0FEH,5CH,02H
+0238 FE2A02          326     DB              0FEH,2AH,02H
+023B FD8002          327     DB              0FDH,80H,02H
+023E FDC610          328     DB              0FDH,0C6H,10H
+0241 FD0804          329     DB              0FDH,08H,04H
+0244 FD0804          330     DB              0FDH,08H,04H
+0247 FD8004          331     DB              0FDH,80H,04H
+024A FD0802          332     DB              0FDH,08H,02H
+024D FD8002          333     DB              0FDH,80H,02H
+0250 FDC608          334     DB              0FDH,0C6H,08H
+0253 FE2A04          335     DB              0FEH,2AH,04H
+0256 000002          336     DB              00H,00H,02H
+0259 FDC604          337     DB              0FDH,0C6H,04H
+025C FDC604          338     DB              0FDH,0C6H,04H
+025F FE2A02          339     DB              0FEH,2AH,02H
+0262 FDC602          340     DB              0FDH,0C6H,02H
+0265 FDC602          341     DB              0FDH,0C6H,02H
+0268 FE2A02          342     DB              0FEH,2AH,02H
+026B FE5C10          343     DB              0FEH,5CH,10H
+026E FFFF            344     DB              0FFH,0FFH
+                     345     ;;;;;;;;;;;;;;
+0270                 346     TAB_GAO_DI:
+0270 FB0804          347     DB              0FBH,08H,04H
+0273 FD8004          348     DB              0FDH,80H,04H
+0276 FCAE03          349     DB              0FCH,0AEH,03H
+0279 FD0801          350     DB              0FDH,08H,01H
+027C FD3004          351     DB              0FDH,30H,04H
+027F FD0802          352     DB              0FDH,08H,02H
+0282 FB8C01          353     DB              0FBH,8CH,01H
+0285 FD0802          354     DB              0FDH,08H,02H
+0288 FCAE01          355     DB              0FCH,0AEH,01H
+028B FC4A01          356     DB              0FCH,4AH,01H
+028E FC0E01          357     DB              0FCH,0EH,01H
+0291 FC4A01          358     DB              0FCH,4AH,01H
+0294 FCAE04          359     DB              0FCH,0AEH,04H
+0297 FB0004          360     DB              0FBH,00H,04H
+029A FD0804          361     DB              0FDH,08H,04H
+029D FD8004          362     DB              0FDH,80H,04H
+02A0 FCAE03          363     DB              0FCH,0AEH,03H
+02A3 FD0801          364     DB              0FDH,08H,01H
+02A6 FD3004          365     DB              0FDH,30H,04H
+02A9 FD0802          366     DB              0FDH,08H,02H
+02AC FB8C01          367     DB              0FBH,8CH,01H
+02AF FD0802          368     DB              0FDH,08H,02H
+02B2 FCAE01          369     DB              0FCH,0AEH,01H
+02B5 FD0801          370     DB              0FDH,08H,01H
+02B8 FD3001          371     DB              0FDH,30H,01H
+02BB FCAE01          372     DB              0FCH,0AEH,01H
+02BE FC4A04          373     DB              0FCH,4AH,04H
+02C1 FFFF            374     DB              0FFH,0FFH
+                     375     ;;;;;;;;;;;;;;
+02C3                 376     TIME1:
+02C3 898C            377             MOV TH0,R1
+02C5 888A            378             MOV TL0,R0
+02C7 B297            379             CPL SPEALER
+02C9 32              380             RETI
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE     7
+
+                     381     ;;;;;;;;;;;;;;
+02CA                 382     D130:
+02CA 7F78            383             MOV R7,#120
+02CC                 384     DEL0:
+02CC 7EC8            385             MOV R6,#200
+02CE                 386     DEL1:
+02CE 00              387             NOP
+02CF 00              388             NOP
+02D0 DEFC            389             DJNZ R6,DEL1
+02D2 DFF8            390             DJNZ R7,DEL0
+02D4 22              391             RET
+                     392     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+                     393     ;;;;;;;;;;;;;;;;;;;;;;;; °´¼üÖÐ¶Ï                                                          
+                                           
+02D5                 394     INT0P:                  ;°´ÈÎÒâ¼üÒ»ÏÂ½øÈëÖÐ¶Ï                                              
+                                           
+                     395                                     ;;;     k1ÎªÑ¡Ôñ¼ü£¬K2ÎªÈ·ÈÏ¼ü£¬K3Îª¼Ó¼ü£¬K4Îª¼õ¼ü         
+                                   
+                     396                                     ;;;;;;;
+02D5 C2AF            397                                     CLR             EA              ;½øÈëºó¹ØÖÐ¶Ï£¬Íê³ÉÕûÌ×²Ù×÷
+                             ²ÅÍË³ö
+02D7 7400            398                                     MOV             A,#0
+02D9 120000   F      399                                     LCALL   CLEAR_SCREEN
+02DC 120493          400                                     LCALL   LCD_MOD2
+                     401                                     ;;;;;
+                     402                                     ;Ñ¡ÔñÄÄ¸öÎÂ¶È¼Æ
+                     403                                     ;;;;;
+02DF                 404     PANDUAN0:               
+02DF 30A5FD          405                                     JNB             SELECT,$
+02E2 7D01            406                                     MOV             R5,#1
+02E4 7E02            407                                     MOV             R6,#2
+02E6 7F24            408                                     MOV             R7,#36
+02E8 9009B0          409                                     MOV             DPTR,#TAB_ZF+72
+02EB 120000   F      410                                     LCALL   DISPLAY_LCD
+02EE 7D01            411                                     MOV             R5,#1
+02F0 7E04            412                                     MOV             R6,#4
+02F2 7F24            413                                     MOV             R7,#36
+02F4 900B90          414                                     MOV             DPTR,#TAB0_9+240
+02F7 120000   F      415                                     LCALL   DISPLAY_LCD
+02FA 20A606          416     SELECT0:                JB              OK,OK0
+02FD 30A6FD          417                                     JNB             OK,$
+0300 020348          418                                     LJMP    SELECT_1820_1
+0303 20A503          419     OK0:                    JB              SELECT,SELECT01
+0306 30A509          420                                     JNB             SELECT,PANXIA     ;ÅÐ¶ÏÏÂÒ»¸ö
+0309                 421     SELECT01:               
+0309 20B5EE          422                                     JB              KOK,SELECT0
+030C 30B5FD          423                                     JNB             KOK,$
+030F 020476          424                                     LJMP    INTOP_END
+                     425     
+0312 30A5FD          426     PANXIA:                 JNB             SELECT,$
+0315 7D01            427                                     MOV             R5,#1
+0317 7E04            428                                     MOV             R6,#4
+0319 7F24            429                                     MOV             R7,#36
+031B 9009B0          430                                     MOV             DPTR,#TAB_ZF+72
+031E 120000   F      431                                     LCALL   DISPLAY_LCD
+0321 7D01            432                                     MOV             R5,#1
+0323 7E02            433                                     MOV             R6,#2
+0325 7F24            434                                     MOV             R7,#36
+0327 900B90          435                                     MOV             DPTR,#TAB0_9+240
+032A 120000   F      436                                     LCALL   DISPLAY_LCD
+032D 20A606          437     SELECT22:               JB              OK,OK1
+0330 30A6FD          438                                     JNB             OK,$
+0333 0203DF          439                                     LJMP    SELECT_1820_2
+0336 20A506          440     OK1:                    JB              SELECT,SELECT1
+0339 30A5FD          441                                     JNB             SELECT,$
+033C 0202DF          442                                     LJMP    PANDUAN0
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE     8
+
+                     443     
+033F 20B5EB          444     SELECT1:                JB              KOK,SELECT22
+0342 30B5FD          445                                     JNB             KOK,$
+0345 020476          446                                     LJMP    INTOP_END
+                     447                                     
+0348                 448     SELECT_1820_1:  
+0348 30A5FD          449                                     JNB             SELECT,$
+034B 7D02            450                                     MOV             R5,#2
+034D 7E00            451                                     MOV             R6,#0
+034F 7F03            452                                     MOV             R7,#3
+0351 9009C8          453                                     MOV             DPTR,#TAB_ZF+96
+0354 120000   F      454                                     LCALL   DISPLAY_LCD
+0357 7D02            455                                     MOV             R5,#2
+0359 7E00            456                                     MOV             R6,#0
+035B 7F2B            457                                     MOV             R7,#43
+035D 900B90          458                                     MOV             DPTR,#TAB0_9+240
+0360 120000   F      459                                     LCALL   DISPLAY_LCD
+0363 20A606          460     SELECT2:                JB              OK,OK2
+0366 30A6FD          461                                     JNB             OK,$
+0369 020399          462                                     LJMP    SELECT_1820_1_H
+036C 20A5F4          463     OK2:                    JB              SELECT,SELECT2
+036F 30A5FD          464                                     JNB             SELECT,$
+0372 7D02            465                                     MOV             R5,#2
+0374 7E00            466                                     MOV             R6,#0
+0376 7F03            467                                     MOV             R7,#3
+0378 900B90          468                                     MOV             DPTR,#TAB0_9+240
+037B 120000   F      469                                     LCALL   DISPLAY_LCD
+037E 7D02            470                                     MOV             R5,#2
+0380 7E00            471                                     MOV             R6,#0
+0382 7F2B            472                                     MOV             R7,#43
+0384 9009C8          473                                     MOV             DPTR,#TAB_ZF+96
+0387 120000   F      474                                     LCALL   DISPLAY_LCD
+038A 20A606          475     SELECT3:                JB              OK,OK3
+038D 30A6FD          476                                     JNB             OK,$
+0390 0203BC          477                                     LJMP    SELECT_1820_1_L
+0393 20A5F4          478     OK3:                    JB              SELECT,SELECT3
+0396 020348          479                                     LJMP    SELECT_1820_1
+0399                 480     SELECT_1820_1_H:;;;;¶ÔµÚÒ»¸öÎÂ¶È¼ÆµÄ¸ßÎÂ²¿·Ö²Ù×÷
+0399 20A70A          481     KDEC1_H:                JB              KADD,KADD1_H
+039C 30A7FD          482                                     JNB             KADD,$
+039F 0543            483                                     INC             TEMPHH1         
+03A1 120493          484                                     LCALL   LCD_MOD2
+03A4 6199            485                                     AJMP    KDEC1_H
+03A6 20960A          486     KADD1_H:                JB              KDEC,KOK1_H
+03A9 3096FD          487                                     JNB             KDEC,$
+03AC 1543            488                                     DEC             TEMPHH1
+03AE 120493          489                                     LCALL   LCD_MOD2
+03B1 6199            490                                     AJMP    KDEC1_H
+03B3 20A6E3          491     KOK1_H:                 JB              OK,KDEC1_H
+03B6 30A6FD          492                                     JNB             OK,$
+03B9 020348          493                                     LJMP    SELECT_1820_1
+03BC                 494     SELECT_1820_1_L:;;;;¶ÔµÚÒ»¸öÎÂ¶È¼ÆµÄµÍÎÂ²¿·Ö²Ù×÷
+03BC 20A70A          495     KDEC1_L:                JB              KADD,KADD1_L
+03BF 30A7FD          496                                     JNB             KADD,$
+03C2 0544            497                                     INC             TEMPLL1         
+03C4 120493          498                                     LCALL   LCD_MOD2
+03C7 61BC            499                                     AJMP    KDEC1_L
+03C9 20960A          500     KADD1_L:                JB              KDEC,KOK1_L
+03CC 3096FD          501                                     JNB             KDEC,$
+03CF 1544            502                                     DEC             TEMPLL1
+03D1 120493          503                                     LCALL   LCD_MOD2
+03D4 61BC            504                                     AJMP    KDEC1_L
+03D6 20A6E3          505     KOK1_L:                 JB              OK,KDEC1_L
+03D9 30A6FD          506                                     JNB             OK,$
+03DC 0202DF          507                                     LJMP    PANDUAN0
+                     508     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE     9
+
+03DF 30A5FD          509     SELECT_1820_2:  JNB             SELECT,$
+03E2 7D02            510                                     MOV             R5,#2
+03E4 7E06            511                                     MOV             R6,#6
+03E6 7F03            512                                     MOV             R7,#3
+03E8 9009C8          513                                     MOV             DPTR,#TAB_ZF+96
+03EB 120000   F      514                                     LCALL   DISPLAY_LCD
+03EE 7D02            515                                     MOV             R5,#2
+03F0 7E06            516                                     MOV             R6,#6
+03F2 7F2B            517                                     MOV             R7,#43
+03F4 900B90          518                                     MOV             DPTR,#TAB0_9+240
+03F7 120000   F      519                                     LCALL   DISPLAY_LCD
+03FA 20A606          520     SELECT4:                JB              OK,OK4
+03FD 30A6FD          521                                     JNB             OK,$
+0400 020430          522                                     LJMP    SELECT_1820_2_H
+0403 20A5F4          523     OK4:                    JB              SELECT,SELECT4
+0406 30A5FD          524                                     JNB             SELECT,$
+0409 7D02            525                                     MOV             R5,#2
+040B 7E06            526                                     MOV             R6,#6
+040D 7F03            527                                     MOV             R7,#3
+040F 900B90          528                                     MOV             DPTR,#TAB0_9+240
+0412 120000   F      529                                     LCALL   DISPLAY_LCD
+0415 7D02            530                                     MOV             R5,#2
+0417 7E06            531                                     MOV             R6,#6
+0419 7F2B            532                                     MOV             R7,#43
+041B 9009C8          533                                     MOV             DPTR,#TAB_ZF+96
+041E 120000   F      534                                     LCALL   DISPLAY_LCD
+0421 20A606          535     SELECT5:                JB              OK,OK5
+0424 30A6FD          536                                     JNB             OK,$
+0427 020453          537                                     LJMP    SELECT_1820_2_L
+042A 20A5F4          538     OK5:                    JB              SELECT,SELECT5
+042D 0203DF          539                                     LJMP    SELECT_1820_2
+0430                 540     SELECT_1820_2_H:;;;;¶ÔµÚ¶þ¸öÎÂ¶È¼ÆµÄ¸ßÎÂ²¿·Ö²Ù×÷
+0430 20A70A          541     KDEC2_H:                JB              KADD,KADD2_H
+0433 30A7FD          542                                     JNB             KADD,$
+0436 0545            543                                     INC             TEMPHH2         
+0438 120493          544                                     LCALL   LCD_MOD2
+043B 8130            545                                     AJMP    KDEC2_H
+043D 20960A          546     KADD2_H:                JB              KDEC,KOK2_H
+0440 3096FD          547                                     JNB             KDEC,$
+0443 1545            548                                     DEC             TEMPHH2
+0445 120493          549                                     LCALL   LCD_MOD2
+0448 8130            550                                     AJMP    KDEC2_H
+044A 20A6E3          551     KOK2_H:                 JB              OK,KDEC2_H
+044D 30A6FD          552                                     JNB             OK,$
+0450 0203DF          553                                     LJMP    SELECT_1820_2
+0453                 554     SELECT_1820_2_L:;;;;¶ÔµÚ¶þ¸öÎÂ¶È¼ÆµÄµÍÎÂ²¿·Ö²Ù×÷
+0453 20A70A          555     KDEC2_L:                JB              KADD,KADD2_L
+0456 30A7FD          556                                     JNB             KADD,$
+0459 0546            557                                     INC             TEMPLL2         
+045B 120493          558                                     LCALL   LCD_MOD2
+045E 8153            559                                     AJMP    KDEC2_L
+0460 20960A          560     KADD2_L:                JB              KDEC,KOK2_L
+0463 3096FD          561                                     JNB             KDEC,$
+0466 1546            562                                     DEC             TEMPLL2
+0468 120493          563                                     LCALL   LCD_MOD2
+046B 8153            564                                     AJMP    KDEC2_L
+046D 20A6E3          565     KOK2_L:                 JB              OK,KDEC2_L
+0470 30A6FD          566                                     JNB             OK,$
+0473 0202DF          567                                     LJMP    PANDUAN0
+                     568     ;;;;;;;;;;;;;;;;;;;;;;;;;;
+0476                 569     INTOP_END:              
+0476 D2AF            570                                     SETB    EA
+0478 120769          571                                     LCALL   LCD_MOD1
+047B 32              572                                     RETI
+                     573     ;;;;;;;;;;;;;;;;;;;;;;;;
+047C C28C            574     INT1P:                  CLR             TR0
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    10
+
+047E 75500A          575                                     MOV             CONUT_ALARM,#10
+0481 D083            576                                     POP             DPH
+0483 D082            577                                     POP             DPL
+0485 90005B          578                                     MOV             DPTR,#SMAIN
+0488 C082            579                                     PUSH    DPL
+048A C083            580                                     PUSH    DPH
+048C 120769          581                                     LCALL   LCD_MOD1
+048F 120614          582                                     LCALL   DS18B20_TEMP  ;ÏÔÊ¾ÎÂ¶ÈÖµ
+0492 32              583                                     RETI
+                     584     ;;;;;;;;;;;;;;;;;;;;;;;;
+0493                 585     LCD_MOD2:                                                                                  
+                                                          
+                     586                                     ;;;;;           T
+0493 7D01            587                                     MOV             R5,#1
+0495 7E02            588                                     MOV             R6,#2
+0497 7F00            589                                     MOV             R7,#0
+0499 9009E0          590                                     MOV             DPTR,#TAB_WEN
+049C 120000   F      591                                     LCALL   DISPLAY_LCD
+049F 7D01            592                                     MOV             R5,#1
+04A1 7E04            593                                     MOV             R6,#4
+04A3 7F00            594                                     MOV             R7,#0
+04A5 9009E0          595                                     MOV             DPTR,#TAB_WEN
+04A8 120000   F      596                                     LCALL   DISPLAY_LCD
+                     597                                     ;;;;;           £º
+04AB 7D01            598                                     MOV             R5,#1
+04AD 7E02            599                                     MOV             R6,#2
+04AF 7F18            600                                     MOV             R7,#24
+04B1 9009F8          601                                     MOV             DPTR,#TAB_WEN+24
+04B4 120000   F      602                                     LCALL   DISPLAY_LCD
+04B7 7D01            603                                     MOV             R5,#1
+04B9 7E04            604                                     MOV             R6,#4
+04BB 7F18            605                                     MOV             R7,#24
+04BD 9009F8          606                                     MOV             DPTR,#TAB_WEN+24
+04C0 120000   F      607                                     LCALL   DISPLAY_LCD
+                     608                                     ;;;;;           1
+04C3 7D01            609                                     MOV             R5,#1
+04C5 7E02            610                                     MOV             R6,#2
+04C7 7F0C            611                                     MOV             R7,#12
+04C9 900AB8          612                                     MOV             DPTR,#TAB0_9+24
+04CC 120000   F      613                                     LCALL   DISPLAY_LCD
+                     614                                     ;;;;;           2
+04CF 7D01            615                                     MOV             R5,#1
+04D1 7E04            616                                     MOV             R6,#4
+04D3 7F0C            617                                     MOV             R7,#12
+04D5 900AD0          618                                     MOV             DPTR,#TAB0_9+48
+04D8 120000   F      619                                     LCALL   DISPLAY_LCD
+                     620                                     ;;;;             
+                     621                                     ;+ºÅ             
+                     622                                     ;;;;             
+04DB 7D01            623                                     MOV             R5,#1
+04DD 7E02            624                                     MOV             R6,#2
+04DF 7F34            625                                     MOV             R7,#52
+04E1 900968          626                                     MOV             DPTR,#TAB_ZF
+04E4 120000   F      627                                     LCALL   DISPLAY_LCD
+04E7 7D01            628                                     MOV             R5,#1
+04E9 7E04            629                                     MOV             R6,#4
+04EB 7F34            630                                     MOV             R7,#52
+04ED 900968          631                                     MOV             DPTR,#TAB_ZF
+04F0 120000   F      632                                     LCALL   DISPLAY_LCD
+                     633                                     ;;;;;;;;;;;;;;;
+                     634                                     ;;;;
+                     635                                     ;-ºÅ
+                     636                                     ;;;;
+04F3 7D02            637                                     MOV             R5,#2
+04F5 7E02            638                                     MOV             R6,#2
+04F7 7F1C            639                                     MOV             R7,#28
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    11
+
+04F9 900980          640                                     MOV             DPTR,#TAB_ZF+24
+04FC 120000   F      641                                     LCALL   DISPLAY_LCD
+04FF 7D02            642                                     MOV             R5,#2
+0501 7E04            643                                     MOV             R6,#4
+0503 7F1C            644                                     MOV             R7,#28
+0505 900980          645                                     MOV             DPTR,#TAB_ZF+24
+0508 120000   F      646                                     LCALL   DISPLAY_LCD
+                     647                                     ;;;;;;;;;;;;;;;
+                     648                                     ;TEMPHH1
+                     649                                     ;;;;¸ßÎ»
+050B E543            650                                     MOV             A,TEMPHH1
+050D 120000   F      651                                     LCALL   HEX_BCD
+0510 FC              652                                     MOV             R4,A
+0511 900AA0          653                                     MOV             DPTR,#TAB0_9
+0514 54F0            654                                     ANL             A,#0F0H
+0516 C4              655                                     SWAP    A
+0517 75F018          656                                     MOV             B,#24
+051A A4              657                                     MUL             AB
+051B C3              658                                     CLR             C
+051C 2582            659                                     ADD             A,DPL
+051E F582            660                                     MOV             DPL,A
+0520 E583            661                                     MOV             A,DPH
+0522 3400            662                                     ADDC    A,#0
+0524 F583            663                                     MOV             DPH,A
+                     664                                     ;;;;;   
+0526 7D02            665                                     MOV             R5,#2
+0528 7E02            666                                     MOV             R6,#2
+052A 7F00            667                                     MOV             R7,#0
+052C 120000   F      668                                     LCALL   DISPLAY_LCD
+                     669                                     ;;;;µÍÎ»
+052F EC              670                                     MOV             A,R4
+0530 900AA0          671                                     MOV             DPTR,#TAB0_9
+0533 540F            672                                     ANL             A,#0FH
+0535 75F018          673                                     MOV             B,#24
+0538 A4              674                                     MUL             AB
+0539 C3              675                                     CLR             C
+053A 2582            676                                     ADD             A,DPL
+053C F582            677                                     MOV             DPL,A
+053E E583            678                                     MOV             A,DPH
+0540 3400            679                                     ADDC    A,#0
+0542 F583            680                                     MOV             DPH,A
+                     681                                     ;;;;;   
+0544 7D02            682                                     MOV             R5,#2
+0546 7E02            683                                     MOV             R6,#2
+0548 7F0C            684                                     MOV             R7,#12
+054A 120000   F      685                                     LCALL   DISPLAY_LCD
+                     686                                     ;;;;;;;;;;;;;;;
+                     687                                     ;TEMPLL1
+                     688                                     ;;;;¸ßÎ»
+054D E544            689                                     MOV             A,TEMPLL1
+054F 120000   F      690                                     LCALL   HEX_BCD
+0552 FC              691                                     MOV             R4,A
+0553 900AA0          692                                     MOV             DPTR,#TAB0_9
+0556 54F0            693                                     ANL             A,#0F0H
+0558 C4              694                                     SWAP    A
+0559 75F018          695                                     MOV             B,#24
+055C A4              696                                     MUL             AB
+055D C3              697                                     CLR             C
+055E 2582            698                                     ADD             A,DPL
+0560 F582            699                                     MOV             DPL,A
+0562 E583            700                                     MOV             A,DPH
+0564 3400            701                                     ADDC    A,#0
+0566 F583            702                                     MOV             DPH,A
+                     703                                     ;;;;;   
+0568 7D02            704                                     MOV             R5,#2
+056A 7E02            705                                     MOV             R6,#2
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    12
+
+056C 7F28            706                                     MOV             R7,#40
+056E 120000   F      707                                     LCALL   DISPLAY_LCD
+                     708                                     ;;;;µÍÎ»
+0571 EC              709                                     MOV             A,R4
+0572 900AA0          710                                     MOV             DPTR,#TAB0_9
+0575 540F            711                                     ANL             A,#0FH
+0577 75F018          712                                     MOV             B,#24
+057A A4              713                                     MUL             AB
+057B C3              714                                     CLR             C
+057C 2582            715                                     ADD             A,DPL
+057E F582            716                                     MOV             DPL,A
+0580 E583            717                                     MOV             A,DPH
+0582 3400            718                                     ADDC    A,#0
+0584 F583            719                                     MOV             DPH,A
+                     720                                     ;;;;;   
+0586 7D02            721                                     MOV             R5,#2
+0588 7E02            722                                     MOV             R6,#2
+058A 7F34            723                                     MOV             R7,#52
+058C 120000   F      724                                     LCALL   DISPLAY_LCD
+                     725                                     ;;;;;;;;;;;;;;;
+                     726                                     ;TEMPHH2
+                     727                                     ;;;;¸ßÎ»
+058F E545            728                                     MOV             A,TEMPHH2
+0591 120000   F      729                                     LCALL   HEX_BCD
+0594 FC              730                                     MOV             R4,A
+0595 900AA0          731                                     MOV             DPTR,#TAB0_9
+0598 54F0            732                                     ANL             A,#0F0H
+059A C4              733                                     SWAP    A
+059B 75F018          734                                     MOV             B,#24
+059E A4              735                                     MUL             AB
+059F C3              736                                     CLR             C
+05A0 2582            737                                     ADD             A,DPL
+05A2 F582            738                                     MOV             DPL,A
+05A4 E583            739                                     MOV             A,DPH
+05A6 3400            740                                     ADDC    A,#0
+05A8 F583            741                                     MOV             DPH,A
+                     742                                     ;;;;;   
+05AA 7D02            743                                     MOV             R5,#2
+05AC 7E04            744                                     MOV             R6,#4
+05AE 7F00            745                                     MOV             R7,#0
+05B0 120000   F      746                                     LCALL   DISPLAY_LCD
+                     747                                     ;;;;µÍÎ»
+05B3 EC              748                                     MOV             A,R4
+05B4 900AA0          749                                     MOV             DPTR,#TAB0_9
+05B7 540F            750                                     ANL             A,#0FH
+05B9 75F018          751                                     MOV             B,#24
+05BC A4              752                                     MUL             AB
+05BD C3              753                                     CLR             C
+05BE 2582            754                                     ADD             A,DPL
+05C0 F582            755                                     MOV             DPL,A
+05C2 E583            756                                     MOV             A,DPH
+05C4 3400            757                                     ADDC    A,#0
+05C6 F583            758                                     MOV             DPH,A
+                     759                                     ;;;;;   
+05C8 7D02            760                                     MOV             R5,#2
+05CA 7E04            761                                     MOV             R6,#4
+05CC 7F0C            762                                     MOV             R7,#12
+05CE 120000   F      763                                     LCALL   DISPLAY_LCD
+                     764                                     ;;;;;;;;;;;;;;;
+                     765                                     ;TEMPLL2
+                     766                                     ;;;;¸ßÎ»
+05D1 E546            767                                     MOV             A,TEMPLL2
+05D3 120000   F      768                                     LCALL   HEX_BCD
+05D6 FC              769                                     MOV             R4,A
+05D7 900AA0          770                                     MOV             DPTR,#TAB0_9
+05DA 54F0            771                                     ANL             A,#0F0H
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    13
+
+05DC C4              772                                     SWAP    A
+05DD 75F018          773                                     MOV             B,#24
+05E0 A4              774                                     MUL             AB
+05E1 C3              775                                     CLR             C
+05E2 2582            776                                     ADD             A,DPL
+05E4 F582            777                                     MOV             DPL,A
+05E6 E583            778                                     MOV             A,DPH
+05E8 3400            779                                     ADDC    A,#0
+05EA F583            780                                     MOV             DPH,A
+                     781                                     ;;;;;   
+05EC 7D02            782                                     MOV             R5,#2
+05EE 7E04            783                                     MOV             R6,#4
+05F0 7F28            784                                     MOV             R7,#40
+05F2 120000   F      785                                     LCALL   DISPLAY_LCD
+                     786                                     ;;;;µÍÎ»
+05F5 EC              787                                     MOV             A,R4
+05F6 900AA0          788                                     MOV             DPTR,#TAB0_9
+05F9 540F            789                                     ANL             A,#0FH
+05FB 75F018          790                                     MOV             B,#24
+05FE A4              791                                     MUL             AB
+05FF C3              792                                     CLR             C
+0600 2582            793                                     ADD             A,DPL
+0602 F582            794                                     MOV             DPL,A
+0604 E583            795                                     MOV             A,DPH
+0606 3400            796                                     ADDC    A,#0
+0608 F583            797                                     MOV             DPH,A
+                     798                                     ;;;;;   
+060A 7D02            799                                     MOV             R5,#2
+060C 7E04            800                                     MOV             R6,#4
+060E 7F34            801                                     MOV             R7,#52
+0610 120000   F      802                                     LCALL   DISPLAY_LCD
+0613 22              803                                     RET
+                     804     ;;;;;;;;;;;;;;;;;;;;;;;;
+0614                 805     DS18B20_TEMP:   ;;;;µÚÒ»¸öÎÂ¶È¼ÆµÄÏÔÊ¾  
+0614 7F01            806                                     MOV             R7,#1
+0616 120000   F      807                                     LCALL   READ_TEMP
+0619 E540            808                                     MOV             A,TEMPHC
+061B 54F0            809                                     ANL             A,#0F0H
+061D B40003          810                                     CJNE    A,#00H,ZHENG
+0620 020632          811                                     LJMP    FUSHU
+0623                 812     ZHENG:                  ;;;;;
+                     813                                     ;+ºÅ
+                     814                                     ;;;;;
+0623 7D01            815                                     MOV             R5,#1
+0625 7E04            816                                     MOV             R6,#4
+0627 7F28            817                                     MOV             R7,#40
+0629 900968          818                                     MOV             DPTR,#TAB_ZF
+062C 120000   F      819                                     LCALL   DISPLAY_LCD
+062F 02063E          820                                     LJMP    BAISHIGE                  ;Ìøµ½Ê®Î»¸öÎ»
+0632                 821     FUSHU:                  ;;;;
+                     822                                     ;-ºÅ
+                     823                                     ;;;;
+0632 7D01            824                                     MOV             R5,#1
+0634 7E04            825                                     MOV             R6,#4
+0636 7F28            826                                     MOV             R7,#40
+0638 900980          827                                     MOV             DPTR,#TAB_ZF+24
+063B 120000   F      828                                     LCALL   DISPLAY_LCD
+063E                 829     BAISHIGE:               
+                     830                                     ;;;;;
+                     831                                     ;°ÙÎ»
+                     832                                     ;;;;;
+063E E540            833                                     MOV             A,TEMPHC
+0640 54F0            834                                     ANL             A,#0F0H
+0642 B4100F          835                                     CJNE    A,#10H,BAI_1
+0645 7D01            836                                     MOV             R5,#1
+0647 7E04            837                                     MOV             R6,#4
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    14
+
+0649 7F34            838                                     MOV             R7,#52
+064B 900AB8          839                                     MOV             DPTR,#TAB0_9+24
+064E 120000   F      840                                     LCALL   DISPLAY_LCD
+0651 020660          841                                     LJMP    BAISHIGE1       ;
+0654 7D01            842     BAI_1:                  MOV             R5,#1
+0656 7E04            843                                     MOV             R6,#4
+0658 7F34            844                                     MOV             R7,#52
+065A 900AA0          845                                     MOV             DPTR,#TAB0_9
+065D 120000   F      846                                     LCALL   DISPLAY_LCD
+0660                 847     BAISHIGE1:
+                     848                                     ;;;;;
+                     849                                     ;Ê®Î»
+                     850                                     ;;;;;
+0660 E540            851                                     MOV             A,TEMPHC
+0662 900AA0          852                                     MOV             DPTR,#TAB0_9
+0665 540F            853                                     ANL             A,#0FH
+0667 75F018          854                                     MOV             B,#24
+066A A4              855                                     MUL             AB
+066B C3              856                                     CLR             C
+066C 2582            857                                     ADD             A,DPL
+066E F582            858                                     MOV             DPL,A
+0670 E583            859                                     MOV             A,DPH
+0672 3400            860                                     ADDC    A,#0
+0674 F583            861                                     MOV             DPH,A
+                     862                                     ;;;;;   
+0676 7D02            863                                     MOV             R5,#2
+0678 7E04            864                                     MOV             R6,#4
+067A 7F00            865                                     MOV             R7,#0
+067C 120000   F      866                                     LCALL   DISPLAY_LCD
+                     867                                     ;;;;;
+                     868                                     ;¸öÎ»
+                     869                                     ;;;;;
+067F E541            870                                     MOV             A,TEMPLC
+0681 900AA0          871                                     MOV             DPTR,#TAB0_9
+0684 54F0            872                                     ANL             A,#0F0H
+0686 C4              873                                     SWAP    A
+0687 75F018          874                                     MOV             B,#24
+068A A4              875                                     MUL             AB
+068B C3              876                                     CLR             C
+068C 2582            877                                     ADD             A,DPL
+068E F582            878                                     MOV             DPL,A
+0690 E583            879                                     MOV             A,DPH
+0692 3400            880                                     ADDC    A,#0
+0694 F583            881                                     MOV             DPH,A
+                     882                                     ;;;;;   
+0696 7D02            883                                     MOV             R5,#2
+0698 7E04            884                                     MOV             R6,#4
+069A 7F0C            885                                     MOV             R7,#12
+069C 120000   F      886                                     LCALL   DISPLAY_LCD
+                     887                                     ;;;;;
+                     888                                     ;Ð¡ÊÎ»
+                     889                                     ;;;;;
+069F E541            890                                     MOV             A,TEMPLC
+06A1 900AA0          891                                     MOV             DPTR,#TAB0_9
+06A4 540F            892                                     ANL             A,#0FH
+06A6 75F018          893                                     MOV             B,#24
+06A9 A4              894                                     MUL             AB
+06AA C3              895                                     CLR             C
+06AB 2582            896                                     ADD             A,DPL
+06AD F582            897                                     MOV             DPL,A
+06AF E583            898                                     MOV             A,DPH
+06B1 3400            899                                     ADDC    A,#0
+06B3 F583            900                                     MOV             DPH,A
+                     901                                     ;;;;;   
+06B5 7D02            902                                     MOV             R5,#2
+06B7 7E04            903                                     MOV             R6,#4
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    15
+
+06B9 7F24            904                                     MOV             R7,#36
+06BB 120000   F      905                                     LCALL   DISPLAY_LCD
+                     906                                     ;;;;;;;;;;
+                     907                                     ;;;;µÚ¶þ¸öÎÂ¶È¼ÆµÄÏÔÊ¾
+                     908                                     ;;;;;;;;;;      
+06BE 7F02            909                                     MOV             R7,#2
+06C0 120000   F      910                                     LCALL   READ_TEMP
+06C3 E540            911                                     MOV             A,TEMPHC
+06C5 54F0            912                                     ANL             A,#0F0H
+06C7 B40003          913                                     CJNE    A,#00H,ZHENG1
+06CA 0206DC          914                                     LJMP    FUSHU1
+06CD                 915     ZHENG1:                 ;;;;;
+                     916                                     ;+ºÅ
+                     917                                     ;;;;;
+06CD 7D01            918                                     MOV             R5,#1
+06CF 7E06            919                                     MOV             R6,#6
+06D1 7F28            920                                     MOV             R7,#40
+06D3 900968          921                                     MOV             DPTR,#TAB_ZF
+06D6 120000   F      922                                     LCALL   DISPLAY_LCD
+06D9 0206E8          923                                     LJMP    BAISHIGE2                 ;Ìøµ½Ê®Î»¸öÎ»
+06DC                 924     FUSHU1:                 ;;;;
+                     925                                     ;-ºÅ
+                     926                                     ;;;;
+06DC 7D01            927                                     MOV             R5,#1
+06DE 7E06            928                                     MOV             R6,#6
+06E0 7F28            929                                     MOV             R7,#40
+06E2 900980          930                                     MOV             DPTR,#TAB_ZF+24
+06E5 120000   F      931                                     LCALL   DISPLAY_LCD
+06E8                 932     BAISHIGE2:              
+                     933                                     ;;;;;
+                     934                                     ;°ÙÎ»
+                     935                                     ;;;;;
+06E8 E540            936                                     MOV             A,TEMPHC
+06EA 54F0            937                                     ANL             A,#0F0H
+06EC B4100F          938                                     CJNE    A,#10H,BAI_11
+06EF 7D01            939                                     MOV             R5,#1
+06F1 7E06            940                                     MOV             R6,#6
+06F3 7F34            941                                     MOV             R7,#52
+06F5 900AB8          942                                     MOV             DPTR,#TAB0_9+24
+06F8 120000   F      943                                     LCALL   DISPLAY_LCD
+06FB 02070A          944                                     LJMP    BAISHIGE11      ;
+06FE 7D01            945     BAI_11:                 MOV             R5,#1
+0700 7E06            946                                     MOV             R6,#6
+0702 7F34            947                                     MOV             R7,#52
+0704 900AA0          948                                     MOV             DPTR,#TAB0_9
+0707 120000   F      949                                     LCALL   DISPLAY_LCD
+070A                 950     BAISHIGE11:
+                     951                                     ;;;;;
+                     952                                     ;Ê®Î»
+                     953                                     ;;;;;
+070A E540            954                                     MOV             A,TEMPHC
+070C 900AA0          955                                     MOV             DPTR,#TAB0_9
+070F 540F            956                                     ANL             A,#0FH
+0711 75F018          957                                     MOV             B,#24
+0714 A4              958                                     MUL             AB
+0715 C3              959                                     CLR             C
+0716 2582            960                                     ADD             A,DPL
+0718 F582            961                                     MOV             DPL,A
+071A E583            962                                     MOV             A,DPH
+071C 3400            963                                     ADDC    A,#0
+071E F583            964                                     MOV             DPH,A
+                     965                                     ;;;;;   
+0720 7D02            966                                     MOV             R5,#2
+0722 7E06            967                                     MOV             R6,#6
+0724 7F00            968                                     MOV             R7,#0
+0726 120000   F      969                                     LCALL   DISPLAY_LCD
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    16
+
+                     970                                     ;;;;;
+                     971                                     ;¸öÎ»
+                     972                                     ;;;;;
+0729 E541            973                                     MOV             A,TEMPLC
+072B 900AA0          974                                     MOV             DPTR,#TAB0_9
+072E 54F0            975                                     ANL             A,#0F0H
+0730 C4              976                                     SWAP    A
+0731 75F018          977                                     MOV             B,#24
+0734 A4              978                                     MUL             AB
+0735 C3              979                                     CLR             C
+0736 2582            980                                     ADD             A,DPL
+0738 F582            981                                     MOV             DPL,A
+073A E583            982                                     MOV             A,DPH
+073C 3400            983                                     ADDC    A,#0
+073E F583            984                                     MOV             DPH,A
+                     985                                     ;;;;;   
+0740 7D02            986                                     MOV             R5,#2
+0742 7E06            987                                     MOV             R6,#6
+0744 7F0C            988                                     MOV             R7,#12
+0746 120000   F      989                                     LCALL   DISPLAY_LCD
+                     990                                     ;;;;;
+                     991                                     ;Ð¡ÊÎ»
+                     992                                     ;;;;;
+0749 E541            993                                     MOV             A,TEMPLC
+074B 900AA0          994                                     MOV             DPTR,#TAB0_9
+074E 540F            995                                     ANL             A,#0FH
+0750 75F018          996                                     MOV             B,#24
+0753 A4              997                                     MUL             AB
+0754 C3              998                                     CLR             C
+0755 2582            999                                     ADD             A,DPL
+0757 F582           1000                                     MOV             DPL,A
+0759 E583           1001                                     MOV             A,DPH
+075B 3400           1002                                     ADDC    A,#0
+075D F583           1003                                     MOV             DPH,A
+                    1004                                     ;;;;;   
+075F 7D02           1005                                     MOV             R5,#2
+0761 7E06           1006                                     MOV             R6,#6
+0763 7F24           1007                                     MOV             R7,#36
+0765 120000   F     1008                                     LCALL   DISPLAY_LCD
+                    1009     
+                    1010                
+0768 22             1011                                     RET
+                    1012     ;;;;;;;;;;;;;;;;;;;;;;;;Ä£Ê½1ÏÂµÄLCDÏÔÊ¾
+0769 120000   F     1013     LCD_MOD1:               LCALL           INIT_LCD;³õÊ¼»¯LCD
+076C E4             1014                                     CLR                     A
+076D 120000   F     1015                                     LCALL           CLEAR_SCREEN;ÇåÆÁ
+0770 E4             1016                                     CLR                     A
+0771 120000   F     1017                                     LCALL           SET_LINE;Ñ¡ÔñÆðÊ¼ÐÐ
+                    1018                                     ;;;;;           Äê
+0774 7D01           1019                                     MOV             R5,#1
+0776 7E00           1020                                     MOV             R6,#0
+0778 7F1C           1021                                     MOV             R7,#28
+077A 900A28         1022                                     MOV             DPTR,#TAB_YMD
+077D 120000   F     1023                                     LCALL   DISPLAY_LCD
+                    1024                                     ;;;;;           ÔÂ
+0780 7D02           1025                                     MOV             R5,#2
+0782 7E00           1026                                     MOV             R6,#0
+0784 7F00           1027                                     MOV             R7,#0
+0786 900A40         1028                                     MOV             DPTR,#TAB_YMD+24
+0789 120000   F     1029                                     LCALL   DISPLAY_LCD
+                    1030                                     ;;;;;           ÈÕ
+078C 7D02           1031                                     MOV             R5,#2
+078E 7E00           1032                                     MOV             R6,#0
+0790 7F24           1033                                     MOV             R7,#36
+0792 900A58         1034                                     MOV             DPTR,#TAB_YMD+48
+0795 120000   F     1035                                     LCALL   DISPLAY_LCD
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    17
+
+                    1036                                     ;;;;;           Ê±
+0798 7D01           1037                                     MOV             R5,#1
+079A 7E02           1038                                     MOV             R6,#2
+079C 7F34           1039                                     MOV             R7,#52
+079E 900A70         1040                                     MOV             DPTR,#TAB_YMD+72
+07A1 120000   F     1041                                     LCALL   DISPLAY_LCD
+                    1042                                     ;;;;;           ·Ö
+07A4 7D02           1043                                     MOV             R5,#2
+07A6 7E02           1044                                     MOV             R6,#2
+07A8 7F18           1045                                     MOV             R7,#24
+07AA 900A88         1046                                     MOV             DPTR,#TAB_YMD+96
+07AD 120000   F     1047                                     LCALL   DISPLAY_LCD
+                    1048                                     ;;;;;           T
+07B0 7D01           1049                                     MOV             R5,#1
+07B2 7E04           1050                                     MOV             R6,#4
+07B4 7F00           1051                                     MOV             R7,#0
+07B6 9009E0         1052                                     MOV             DPTR,#TAB_WEN
+07B9 120000   F     1053                                     LCALL   DISPLAY_LCD
+07BC 7D01           1054                                     MOV             R5,#1
+07BE 7E06           1055                                     MOV             R6,#6
+07C0 7F00           1056                                     MOV             R7,#0
+07C2 9009E0         1057                                     MOV             DPTR,#TAB_WEN
+07C5 120000   F     1058                                     LCALL   DISPLAY_LCD
+                    1059                                     ;;;;;           £º
+07C8 7D01           1060                                     MOV             R5,#1
+07CA 7E04           1061                                     MOV             R6,#4
+07CC 7F18           1062                                     MOV             R7,#24
+07CE 9009F8         1063                                     MOV             DPTR,#TAB_WEN+24
+07D1 120000   F     1064                                     LCALL   DISPLAY_LCD
+07D4 7D01           1065                                     MOV             R5,#1
+07D6 7E06           1066                                     MOV             R6,#6
+07D8 7F18           1067                                     MOV             R7,#24
+07DA 9009F8         1068                                     MOV             DPTR,#TAB_WEN+24
+07DD 120000   F     1069                                     LCALL   DISPLAY_LCD
+                    1070                                     ;;;;;           1
+07E0 7D01           1071                                     MOV             R5,#1
+07E2 7E04           1072                                     MOV             R6,#4
+07E4 7F0C           1073                                     MOV             R7,#12
+07E6 900AB8         1074                                     MOV             DPTR,#TAB0_9+24
+07E9 120000   F     1075                                     LCALL   DISPLAY_LCD
+                    1076                                     ;;;;;           2
+07EC 7D01           1077                                     MOV             R5,#1
+07EE 7E06           1078                                     MOV             R6,#6
+07F0 7F0C           1079                                     MOV             R7,#12
+07F2 900AD0         1080                                     MOV             DPTR,#TAB0_9+48
+07F5 120000   F     1081                                     LCALL   DISPLAY_LCD
+                    1082                                     ;;;;;           .
+07F8 7D02           1083                                     MOV             R5,#2
+07FA 7E04           1084                                     MOV             R6,#4
+07FC 7F18           1085                                     MOV             R7,#24
+07FE 900A10         1086                                     MOV             DPTR,#TAB_WEN+48
+0801 120000   F     1087                                     LCALL   DISPLAY_LCD
+0804 7D02           1088                                     MOV             R5,#2
+0806 7E06           1089                                     MOV             R6,#6
+0808 7F18           1090                                     MOV             R7,#24
+080A 900A10         1091                                     MOV             DPTR,#TAB_WEN+48
+080D 120000   F     1092                                     LCALL   DISPLAY_LCD
+                    1093                                     ;;;;;           ¡æ
+0810 7D02           1094                                     MOV             R5,#2
+0812 7E04           1095                                     MOV             R6,#4
+0814 7F30           1096                                     MOV             R7,#48
+0816 900998         1097                                     MOV             DPTR,#TAB_ZF+48
+0819 120000   F     1098                                     LCALL   DISPLAY_LCD
+081C 7D02           1099                                     MOV             R5,#2
+081E 7E06           1100                                     MOV             R6,#6
+0820 7F30           1101                                     MOV             R7,#48
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    18
+
+0822 900998         1102                                     MOV             DPTR,#TAB_ZF+48
+0825 120000   F     1103                                     LCALL   DISPLAY_LCD
+                    1104                                     ;;;;
+0828 22             1105                                     RET
+                    1106     ;;;;;;;;;;;;;;;;;;;;;;;;;ÏÔÊ¾Ê±¼äÖµµ½LCD
+0829 120000   F     1107     DISP_1302_LCD:  LCALL   GET1302;»ñÈ¡Ê±¼ä
+                    1108                                     ;;;;;;
+                    1109                                     ;Äê
+                    1110                                     ;;;;;;
+082C E536           1111                                     MOV             A,YEAR
+082E 900AA0         1112                                     MOV             DPTR,#TAB0_9
+0831 54F0           1113                                     ANL             A,#0F0H
+0833 C4             1114                                     SWAP    A
+0834 75F018         1115                                     MOV             B,#24
+0837 A4             1116                                     MUL             AB
+0838 C3             1117                                     CLR             C
+0839 2582           1118                                     ADD             A,DPL
+083B F582           1119                                     MOV             DPL,A
+083D E583           1120                                     MOV             A,DPH
+083F 3400           1121                                     ADDC    A,#0
+0841 F583           1122                                     MOV             DPH,A
+                    1123                                     ;;;;;   
+0843 7D01           1124                                     MOV             R5,#1
+0845 7E00           1125                                     MOV             R6,#0
+0847 7F04           1126                                     MOV             R7,#4
+0849 120000   F     1127                                     LCALL   DISPLAY_LCD
+                    1128                                     ;;;;;;
+084C E536           1129                                     MOV             A,YEAR
+084E 900AA0         1130                                     MOV             DPTR,#TAB0_9
+0851 540F           1131                                     ANL             A,#0FH
+0853 75F018         1132                                     MOV             B,#24
+0856 A4             1133                                     MUL             AB
+0857 C3             1134                                     CLR             C
+0858 2582           1135                                     ADD             A,DPL
+085A F582           1136                                     MOV             DPL,A
+085C E583           1137                                     MOV             A,DPH
+085E 3400           1138                                     ADDC    A,#0
+0860 F583           1139                                     MOV             DPH,A
+                    1140                                     ;;;;;   
+0862 7D01           1141                                     MOV             R5,#1
+0864 7E00           1142                                     MOV             R6,#0
+0866 7F10           1143                                     MOV             R7,#16
+0868 120000   F     1144                                     LCALL   DISPLAY_LCD
+                    1145                                     ;;;;;;
+                    1146                                     ;ÔÂ
+                    1147                                     ;;;;;;
+086B E534           1148                                     MOV             A,MONTH
+086D 900AA0         1149                                     MOV             DPTR,#TAB0_9
+0870 54F0           1150                                     ANL             A,#0F0H
+0872 C4             1151                                     SWAP    A
+0873 75F018         1152                                     MOV             B,#24
+0876 A4             1153                                     MUL             AB
+0877 C3             1154                                     CLR             C
+0878 2582           1155                                     ADD             A,DPL
+087A F582           1156                                     MOV             DPL,A
+087C E583           1157                                     MOV             A,DPH
+087E 3400           1158                                     ADDC    A,#0
+0880 F583           1159                                     MOV             DPH,A
+                    1160                                     ;;;;;   
+0882 7D01           1161                                     MOV             R5,#1
+0884 7E00           1162                                     MOV             R6,#0
+0886 7F28           1163                                     MOV             R7,#40
+0888 120000   F     1164                                     LCALL   DISPLAY_LCD
+                    1165                                     ;;;;;;
+088B E534           1166                                     MOV             A,MONTH
+088D 900AA0         1167                                     MOV             DPTR,#TAB0_9
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    19
+
+0890 540F           1168                                     ANL             A,#0FH
+0892 75F018         1169                                     MOV             B,#24
+0895 A4             1170                                     MUL             AB
+0896 C3             1171                                     CLR             C
+0897 2582           1172                                     ADD             A,DPL
+0899 F582           1173                                     MOV             DPL,A
+089B E583           1174                                     MOV             A,DPH
+089D 3400           1175                                     ADDC    A,#0
+089F F583           1176                                     MOV             DPH,A
+                    1177                                     ;;;;;   
+08A1 7D01           1178                                     MOV             R5,#1
+08A3 7E00           1179                                     MOV             R6,#0
+08A5 7F34           1180                                     MOV             R7,#52
+08A7 120000   F     1181                                     LCALL   DISPLAY_LCD
+                    1182                                     ;;;;;;
+                    1183                                     ;ÈÕ
+                    1184                                     ;;;;;;
+08AA E533           1185                                     MOV             A,DAY
+08AC 900AA0         1186                                     MOV             DPTR,#TAB0_9
+08AF 54F0           1187                                     ANL             A,#0F0H
+08B1 C4             1188                                     SWAP    A
+08B2 75F018         1189                                     MOV             B,#24
+08B5 A4             1190                                     MUL             AB
+08B6 C3             1191                                     CLR             C
+08B7 2582           1192                                     ADD             A,DPL
+08B9 F582           1193                                     MOV             DPL,A
+08BB E583           1194                                     MOV             A,DPH
+08BD 3400           1195                                     ADDC    A,#0
+08BF F583           1196                                     MOV             DPH,A
+                    1197                                     ;;;;;   
+08C1 7D02           1198                                     MOV             R5,#2
+08C3 7E00           1199                                     MOV             R6,#0
+08C5 7F0C           1200                                     MOV             R7,#12
+08C7 120000   F     1201                                     LCALL   DISPLAY_LCD
+                    1202                                     ;;;;;;
+08CA E533           1203                                     MOV             A,DAY
+08CC 900AA0         1204                                     MOV             DPTR,#TAB0_9
+08CF 540F           1205                                     ANL             A,#0FH
+08D1 75F018         1206                                     MOV             B,#24
+08D4 A4             1207                                     MUL             AB
+08D5 C3             1208                                     CLR             C
+08D6 2582           1209                                     ADD             A,DPL
+08D8 F582           1210                                     MOV             DPL,A
+08DA E583           1211                                     MOV             A,DPH
+08DC 3400           1212                                     ADDC    A,#0
+08DE F583           1213                                     MOV             DPH,A
+                    1214                                     ;;;;;   
+08E0 7D02           1215                                     MOV             R5,#2
+08E2 7E00           1216                                     MOV             R6,#0
+08E4 7F18           1217                                     MOV             R7,#24
+08E6 120000   F     1218                                     LCALL   DISPLAY_LCD       
+                    1219                                     ;;;;;;
+                    1220                                     ;Ê±
+                    1221                                     ;;;;;;
+08E9 E532           1222                                     MOV             A,HOUR
+08EB 900AA0         1223                                     MOV             DPTR,#TAB0_9
+08EE 54F0           1224                                     ANL             A,#0F0H
+08F0 C4             1225                                     SWAP    A
+08F1 75F018         1226                                     MOV             B,#24
+08F4 A4             1227                                     MUL             AB
+08F5 C3             1228                                     CLR             C
+08F6 2582           1229                                     ADD             A,DPL
+08F8 F582           1230                                     MOV             DPL,A
+08FA E583           1231                                     MOV             A,DPH
+08FC 3400           1232                                     ADDC    A,#0
+08FE F583           1233                                     MOV             DPH,A
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    20
+
+                    1234                                     ;;;;;   
+0900 7D01           1235                                     MOV             R5,#1
+0902 7E02           1236                                     MOV             R6,#2
+0904 7F1C           1237                                     MOV             R7,#28
+0906 120000   F     1238                                     LCALL   DISPLAY_LCD
+                    1239                                     ;;;;;;
+0909 E532           1240                                     MOV             A,HOUR
+090B 900AA0         1241                                     MOV             DPTR,#TAB0_9
+090E 540F           1242                                     ANL             A,#0FH
+0910 75F018         1243                                     MOV             B,#24
+0913 A4             1244                                     MUL             AB
+0914 C3             1245                                     CLR             C
+0915 2582           1246                                     ADD             A,DPL
+0917 F582           1247                                     MOV             DPL,A
+0919 E583           1248                                     MOV             A,DPH
+091B 3400           1249                                     ADDC    A,#0
+091D F583           1250                                     MOV             DPH,A
+                    1251                                     ;;;;;   
+091F 7D01           1252                                     MOV             R5,#1
+0921 7E02           1253                                     MOV             R6,#2
+0923 7F28           1254                                     MOV             R7,#40
+0925 120000   F     1255                                     LCALL   DISPLAY_LCD     
+                    1256                                     ;;;;;;
+                    1257                                     ;·Ö
+                    1258                                     ;;;;;;
+0928 E531           1259                                     MOV             A,MINUTE
+092A 900AA0         1260                                     MOV             DPTR,#TAB0_9
+092D 54F0           1261                                     ANL             A,#0F0H
+092F C4             1262                                     SWAP    A
+0930 75F018         1263                                     MOV             B,#24
+0933 A4             1264                                     MUL             AB
+0934 C3             1265                                     CLR             C
+0935 2582           1266                                     ADD             A,DPL
+0937 F582           1267                                     MOV             DPL,A
+0939 E583           1268                                     MOV             A,DPH
+093B 3400           1269                                     ADDC    A,#0
+093D F583           1270                                     MOV             DPH,A
+                    1271                                     ;;;;;   
+093F 7D02           1272                                     MOV             R5,#2
+0941 7E02           1273                                     MOV             R6,#2
+0943 7F00           1274                                     MOV             R7,#0
+0945 120000   F     1275                                     LCALL   DISPLAY_LCD
+                    1276                                     ;;;;;;
+0948 E531           1277                                     MOV             A,MINUTE
+094A 900AA0         1278                                     MOV             DPTR,#TAB0_9
+094D 540F           1279                                     ANL             A,#0FH
+094F 75F018         1280                                     MOV             B,#24
+0952 A4             1281                                     MUL             AB
+0953 C3             1282                                     CLR             C
+0954 2582           1283                                     ADD             A,DPL
+0956 F582           1284                                     MOV             DPL,A
+0958 E583           1285                                     MOV             A,DPH
+095A 3400           1286                                     ADDC    A,#0
+095C F583           1287                                     MOV             DPH,A
+                    1288                                     ;;;;;   
+095E 7D02           1289                                     MOV             R5,#2
+0960 7E02           1290                                     MOV             R6,#2
+0962 7F0C           1291                                     MOV             R7,#12
+0964 120000   F     1292                                     LCALL   DISPLAY_LCD                              
+0967 22             1293                                     RET
+                    1294     ;;;;;;;;;;;;;;;;;;;;;;;;
+                    1295     ;;;;;;;;;;;;;;;;;;;;;;;;
+                    1296     ;;;;;;;;;;;;;;;;;;;;;;;;
+                    1297     ;;;;;;;;;;;;;;;;;;;;;;;;
+                    1298     ;;;;;;;;;;;;;;;;;;;;;;;;
+                    1299     ;;;;;;;;;;;;;;;;;;;;;;;;
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    21
+
+                    1300     ;;;;;;;;;;;;;;;;;;;;;;;;
+                    1301     ;;;;;;;;;;;;;;;;;;;;;;;;
+0968                1302     TAB_ZF:
+                    1303     ;--  ÎÄ×Ö:  +  --
+                    1304     ;--  ËÎÌå9;  ´Ë×ÖÌåÏÂ¶ÔÓ¦µÄµãÕóÎª£º¿íx¸ß=12x12   --
+                    1305     ;--  ¸ß¶È²»ÊÇ8µÄ±¶Ê£¬ÏÖµ÷ÕûÎª£º¿í¶Èx¸ß¶È=12x16  --;
+0968 2020FC20       1306     DB  020H,020H,0FCH,020H,020H,000H,000H,000H,000H,000H,000H,000H,000H,000H,001H,000H
+096C 20000000                
+0970 00000000                
+0974 00000100                
+0978 00000000       1307     DB  000H,000H,000H,000H,000H,000H,000H,000H
+097C 00000000                
+                    1308     ;--  ÎÄ×Ö:  -  --
+0980 20202020       1309     DB  020H,020H,020H,020H,020H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0984 20000000                
+0988 00000000                
+098C 00000000                
+0990 00000000       1310     DB  000H,000H,000H,000H,000H,000H,000H,000H
+0994 00000000                
+                    1311     ;--  ÎÄ×Ö:  ¡æ  --
+0998 020502F8       1312     DB  002H,005H,002H,0F8H,004H,002H,002H,002H,004H,00EH,080H,000H,000H,000H,000H,000H
+099C 04020202                
+09A0 040E8000                
+09A4 00000000                
+09A8 01020202       1313     DB  001H,002H,002H,002H,002H,001H,000H,000H     
+09AC 02010000                
+                    1314     ;--  ÎÄ×Ö:  ¡Ì  --
+09B0 00000080       1315     DB  000H,000H,000H,080H,000H,000H,080H,060H,018H,006H,001H,000H,000H,002H,001H,000H
+09B4 00008060                
+09B8 18060100                
+09BC 00020100                
+09C0 01060100       1316     DB  001H,006H,001H,000H,000H,000H,000H,000H 
+09C4 00000000                
+                    1317     ;--  ÎÄ×Ö:  ¡ï  --
+09C8 103070F0       1318     DB  010H,030H,070H,0F0H,0FCH,0FFH,0FCH,0F0H,070H,030H,010H,000H,000H,008H,006H,007H
+09CC FCFFFCF0                
+09D0 70301000                
+09D4 00080607                
+09D8 03030307       1319     DB  003H,003H,003H,007H,006H,008H,000H,000H
+09DC 06080000                
+                    1320     ;;;;;;;;;;;;;;;;;;;;;;;;
+09E0                1321     TAB_WEN:
+                    1322     ;--  ÎÄ×Ö:  T  --
+                    1323     ;--  ËÎÌå9;  ´Ë×ÖÌåÏÂ¶ÔÓ¦µÄµãÕóÎª£º¿íx¸ß=12x12   --
+                    1324     ;--  ¸ß¶È²»ÊÇ8µÄ±¶Ê£¬ÏÖµ÷ÕûÎª£º¿í¶Èx¸ß¶È=12x16  --;
+09E0 0C04FC04       1325     DB  00CH,004H,0FCH,004H,00CH,000H,000H,000H,000H,000H,000H,000H,000H,002H,003H,002H
+09E4 0C000000                
+09E8 00000000                
+09EC 00020302                
+09F0 00000000       1326     DB  000H,000H,000H,000H,000H,000H,000H,000H
+09F4 00000000                
+                    1327     ;--  ÎÄ×Ö:  £º  --
+09F8 00003030       1328     DB  000H,000H,030H,030H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,003H,003H
+09FC 00000000                
+0A00 00000000                
+0A04 00000303                
+0A08 00000000       1329     DB  000H,000H,000H,000H,000H,000H,000H,000H
+0A0C 00000000                
+                    1330     ;--  Í¼Ïñ    .  --
+0A10 00808080       1331     DB  000H,080H,080H,080H,000H,000H,000H,000H,000H,000H,000H,000H,000H,003H,003H,003H
+0A14 00000000                
+0A18 00000000                
+0A1C 00030303                
+0A20 00000000       1332     DB  000H,000H,000H,000H,000H,000H,000H,000H
+0A24 00000000                
+                    1333     ;;;;;;;;;;;;;;;;;;;;;;;;
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    22
+
+0A28                1334     TAB_YMD:
+                    1335     ;--  ÎÄ×Ö:  Äê  --
+                    1336     ;--  ¿¬Ìå_GB23129;  ´Ë×ÖÌåÏÂ¶ÔÓ¦µÄµãÕóÎª£º¿íx¸ß=12x12   --
+                    1337     ;--  ¸ß¶È²»ÊÇ8µÄ±¶Ê£¬ÏÖµ÷ÕûÎª£º¿í¶Èx¸ß¶È=12x16  --;
+0A28 1008E724       1338     DB  010H,008H,0E7H,024H,024H,024H,0FCH,024H,024H,024H,004H,000H,001H,001H,001H,001H
+0A2C 2424FC24                
+0A30 24240400                
+0A34 01010101                
+0A38 01010F01       1339     DB  001H,001H,00FH,001H,001H,001H,001H,000H
+0A3C 01010100                
+                    1340     ;--  ÎÄ×Ö:  ÔÂ  --
+0A40 0000FE92       1341     DB  000H,000H,0FEH,092H,092H,092H,092H,092H,092H,0FEH,000H,000H,008H,006H,001H,000H
+0A44 92929292                
+0A48 92FE0000                
+0A4C 08060100                
+0A50 00000008       1342     DB  000H,000H,000H,008H,008H,00FH,000H,000H
+0A54 080F0000                
+                    1343     ;--  ÎÄ×Ö:  ÈÕ  --
+0A58 00FE2222       1344     DB  000H,0FEH,022H,022H,022H,022H,022H,022H,022H,0FEH,000H,000H,000H,00FH,004H,004H
+0A5C 22222222                
+0A60 22FE0000                
+0A64 000F0404                
+0A68 04040404       1345     DB  004H,004H,004H,004H,004H,00FH,000H,000H
+0A6C 040F0000                
+                    1346     ;--  ÎÄ×Ö:  Ê±  --
+0A70 FE2222FE       1347     DB  0FEH,022H,022H,0FEH,000H,008H,048H,088H,008H,0FFH,008H,000H,007H,002H,002H,007H
+0A74 00084888                
+0A78 08FF0800                
+0A7C 07020207                
+0A80 00000009       1348     DB  000H,000H,000H,009H,008H,00FH,000H,000H
+0A84 080F0000                
+                    1349     ;--  ÎÄ×Ö:  ·Ö  --
+0A88 20102C23       1350     DB  020H,010H,02CH,023H,0E0H,020H,020H,023H,0ECH,010H,020H,000H,000H,008H,004H,003H
+0A8C E0202023                
+0A90 EC102000                
+0A94 00080403                
+0A98 00080808       1351     DB  000H,008H,008H,008H,007H,000H,000H,000H
+0A9C 07000000                
+                    1352     ;;;;;;;;;;;;;;;;;;;;;;;;
+0AA0                1353     TAB0_9:
+                    1354     ;--  ÎÄ×Ö:  0  --
+                    1355     ;--  ¿¬Ìå_GB23129;  ´Ë×ÖÌåÏÂ¶ÔÓ¦µÄµãÕóÎª£º¿íx¸ß=12x12   --
+                    1356     ;--  ¸ß¶È²»ÊÇ8µÄ±¶Ê£¬ÏÖµ÷ÕûÎª£º¿í¶Èx¸ß¶È=12x16  --;
+0AA0 F8040404       1357     DB  0F8H,004H,004H,004H,0F8H,000H,000H,000H,000H,000H,000H,000H,001H,002H,002H,002H
+0AA4 F8000000                
+0AA8 00000000                
+0AAC 01020202                
+0AB0 01000000       1358     DB  001H,000H,000H,000H,000H,000H,000H,000H
+0AB4 00000000                
+                    1359     ;--  ÎÄ×Ö:  1  --
+0AB8 0008FC00       1360     DB  000H,008H,0FCH,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,002H,003H,002H
+0ABC 00000000                
+0AC0 00000000                
+0AC4 00020302                
+0AC8 00000000       1361     DB  000H,000H,000H,000H,000H,000H,000H,000H
+0ACC 00000000                
+                    1362     ;--  ÎÄ×Ö:  2  --
+0AD0 18844424       1363     DB  018H,084H,044H,024H,018H,000H,000H,000H,000H,000H,000H,000H,003H,002H,002H,002H
+0AD4 18000000                
+0AD8 00000000                
+0ADC 03020202                
+0AE0 02000000       1364     DB  002H,000H,000H,000H,000H,000H,000H,000H
+0AE4 00000000                
+                    1365     ;--  ÎÄ×Ö:  3  --
+0AE8 08042424       1366     DB  008H,004H,024H,024H,0D8H,000H,000H,000H,000H,000H,000H,000H,001H,002H,002H,002H
+0AEC D8000000                
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    23
+
+0AF0 00000000                
+0AF4 01020202                
+0AF8 01000000       1367     DB  001H,000H,000H,000H,000H,000H,000H,000H
+0AFC 00000000                
+                    1368     ;--  ÎÄ×Ö:  4  --
+0B00 40B088FC       1369     DB  040H,0B0H,088H,0FCH,080H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,003H
+0B04 80000000                
+0B08 00000000                
+0B0C 00000003                
+0B10 02000000       1370     DB  002H,000H,000H,000H,000H,000H,000H,000H
+0B14 00000000                
+                    1371     ;--  ÎÄ×Ö:  5  --
+0B18 3C242424       1372     DB  03CH,024H,024H,024H,0C4H,000H,000H,000H,000H,000H,000H,000H,001H,002H,002H,002H
+0B1C C4000000                
+0B20 00000000                
+0B24 01020202                
+0B28 01000000       1373     DB  001H,000H,000H,000H,000H,000H,000H,000H
+0B2C 00000000                
+                    1374     ;--  ÎÄ×Ö:  6  --
+0B30 F824242C       1375     DB  0F8H,024H,024H,02CH,0C0H,000H,000H,000H,000H,000H,000H,000H,001H,002H,002H,002H
+0B34 C0000000                
+0B38 00000000                
+0B3C 01020202                
+0B40 01000000       1376     DB  001H,000H,000H,000H,000H,000H,000H,000H
+0B44 00000000                
+                    1377     ;--  ÎÄ×Ö:  7  --
+0B48 0C04E41C       1378     DB  00CH,004H,0E4H,01CH,004H,000H,000H,000H,000H,000H,000H,000H,000H,000H,003H,000H
+0B4C 04000000                
+0B50 00000000                
+0B54 00000300                
+0B58 00000000       1379     DB  000H,000H,000H,000H,000H,000H,000H,000H
+0B5C 00000000                
+                    1380     ;--  ÎÄ×Ö:  8  --
+0B60 D8242424       1381     DB  0D8H,024H,024H,024H,0D8H,000H,000H,000H,000H,000H,000H,000H,001H,002H,002H,002H
+0B64 D8000000                
+0B68 00000000                
+0B6C 01020202                
+0B70 01000000       1382     DB  001H,000H,000H,000H,000H,000H,000H,000H
+0B74 00000000                
+                    1383     ;--  ÎÄ×Ö:  9  --
+0B78 38444444       1384     DB  038H,044H,044H,044H,0F8H,000H,000H,000H,000H,000H,000H,000H,000H,003H,002H,002H
+0B7C F8000000                
+0B80 00000000                
+0B84 00030202                
+0B88 01000000       1385     DB  001H,000H,000H,000H,000H,000H,000H,000H
+0B8C 00000000                
+                    1386     ;--  ¿Õ°×  --
+0B90 00000000       1387     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0B94 00000000                
+0B98 00000000                
+0B9C 00000000                
+0BA0 00000000       1388     DB  000H,000H,000H,000H,000H,000H,000H,000H
+0BA4 00000000                
+0BA8                1389     TAB_HOT:
+                    1390     ;;;;;;;;;;;;;;;;;;;;;;
+                    1391     ;HOT
+                    1392     ;--  ¿í¶Èx¸ß¶È=128x64  --
+0BA8 00000000       1393     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0BAC 00000000                
+0BB0 00000000                
+0BB4 00000000                
+0BB8 00000000       1394     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0BBC 00000000                
+0BC0 00000000                
+0BC4 00000000                
+0BC8 00000000       1395     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    24
+
+0BCC 00000000                
+0BD0 00000000                
+0BD4 00000000                
+0BD8 00000000       1396     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0BDC 00000000                
+0BE0 00000000                
+0BE4 00000000                
+0BE8 00000000       1397     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0BEC 00000000                
+0BF0 00000000                
+0BF4 00000000                
+0BF8 00000000       1398     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0BFC 00000000                
+0C00 00000000                
+0C04 00000000                
+0C08 00000000       1399     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0C0C 00000000                
+0C10 00000000                
+0C14 00000000                
+0C18 00000000       1400     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0C1C 00000000                
+0C20 00000000                
+0C24 00000000                
+0C28 00000000       1401     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0C2C 00000000                
+0C30 00000000                
+0C34 00000000                
+0C38 00000000       1402     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0C3C 00000000                
+0C40 00000000                
+0C44 00000000                
+0C48 00000000       1403     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0C4C 00000000                
+0C50 00000000                
+0C54 00000000                
+0C58 00000000       1404     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0C5C 00000000                
+0C60 00000000                
+0C64 00000000                
+0C68 00000000       1405     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0C6C 00000000                
+0C70 00000000                
+0C74 00000000                
+0C78 00000000       1406     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0C7C 00000000                
+0C80 00000000                
+0C84 00000000                
+0C88 00000000       1407     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0C8C 00000000                
+0C90 00000000                
+0C94 00000000                
+0C98 00000000       1408     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0C9C 00000000                
+0CA0 00000000                
+0CA4 00000000                
+0CA8 00000000       1409     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0CAC 00000000                
+0CB0 00000000                
+0CB4 00000000                
+0CB8 00000000       1410     DB  000H,000H,000H,000H,000H,000H,000H,0FCH,0FCH,0FCH,000H,000H,000H,000H,000H,000H
+0CBC 000000FC                
+0CC0 FCFC0000                
+0CC4 00000000                
+0CC8 00000000       1411     DB  000H,000H,000H,000H,000H,000H,000H,000H,0FCH,0FCH,0FCH,000H,000H,000H,000H,000H
+0CCC 00000000                
+0CD0 FCFCFC00                
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    25
+
+0CD4 00000000                
+0CD8 000000C0       1412     DB  000H,000H,000H,0C0H,0E0H,0F0H,0F8H,03CH,01CH,01CH,00EH,00EH,00EH,00EH,00EH,00EH
+0CDC E0F0F83C                
+0CE0 1C1C0E0E                
+0CE4 0E0E0E0E                
+0CE8 0E1C1C3C       1413     DB  00EH,01CH,01CH,03CH,0F8H,0F0H,0E0H,0C0H,000H,000H,000H,000H,01CH,01CH,01CH,01CH
+0CEC F8F0E0C0                
+0CF0 00000000                
+0CF4 1C1C1C1C                
+0CF8 1C1C1C1C       1414     DB  01CH,01CH,01CH,01CH,01CH,01CH,0FCH,0FCH,0FCH,01CH,01CH,01CH,01CH,01CH,01CH,01CH
+0CFC 1C1CFCFC                
+0D00 FC1C1C1C                
+0D04 1C1C1C1C                
+0D08 1C1C1C00       1415     DB  01CH,01CH,01CH,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0D0C 00000000                
+0D10 00000000                
+0D14 00000000                
+0D18 00000000       1416     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0D1C 00000000                
+0D20 00000000                
+0D24 00000000                
+0D28 00000000       1417     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0D2C 00000000                
+0D30 00000000                
+0D34 00000000                
+0D38 00000000       1418     DB  000H,000H,000H,000H,000H,000H,000H,0FFH,0FFH,0FFH,0E0H,0E0H,0E0H,0E0H,0E0H,0E0H
+0D3C 000000FF                
+0D40 FFFFE0E0                
+0D44 E0E0E0E0                
+0D48 E0E0E0E0       1419     DB  0E0H,0E0H,0E0H,0E0H,0E0H,0E0H,0E0H,0E0H,0FFH,0FFH,0FFH,000H,000H,000H,000H,000H
+0D4C E0E0E0E0                
+0D50 FFFFFF00                
+0D54 00000000                
+0D58 00F8FFFF       1420     DB  000H,0F8H,0FFH,0FFH,0FFH,003H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0D5C FF030000                
+0D60 00000000                
+0D64 00000000                
+0D68 00000000       1421     DB  000H,000H,000H,000H,000H,003H,0FFH,0FFH,0FFH,0F8H,000H,000H,000H,000H,000H,000H
+0D6C 0003FFFF                
+0D70 FFF80000                
+0D74 00000000                
+0D78 00000000       1422     DB  000H,000H,000H,000H,000H,000H,0FFH,0FFH,0FFH,000H,000H,000H,000H,000H,000H,000H
+0D7C 0000FFFF                
+0D80 FF000000                
+0D84 00000000                
+0D88 00000000       1423     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0D8C 00000000                
+0D90 00000000                
+0D94 00000000                
+0D98 00000000       1424     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0D9C 00000000                
+0DA0 00000000                
+0DA4 00000000                
+0DA8 00000000       1425     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0DAC 00000000                
+0DB0 00000000                
+0DB4 00000000                
+0DB8 00000000       1426     DB  000H,000H,000H,000H,000H,000H,000H,0FFH,0FFH,0FFH,000H,000H,000H,000H,000H,000H
+0DBC 000000FF                
+0DC0 FFFF0000                
+0DC4 00000000                
+0DC8 00000000       1427     DB  000H,000H,000H,000H,000H,000H,000H,000H,0FFH,0FFH,0FFH,000H,000H,000H,000H,000H
+0DCC 00000000                
+0DD0 FFFFFF00                
+0DD4 00000000                
+0DD8 00073FFF       1428     DB  000H,007H,03FH,0FFH,0FFH,0F0H,0C0H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    26
+
+0DDC FFF0C000                
+0DE0 00000000                
+0DE4 00000000                
+0DE8 00000000       1429     DB  000H,000H,000H,000H,0C0H,0F0H,0FFH,0FFH,03FH,007H,000H,000H,000H,000H,000H,000H
+0DEC C0F0FFFF                
+0DF0 3F070000                
+0DF4 00000000                
+0DF8 00000000       1430     DB  000H,000H,000H,000H,000H,000H,0FFH,0FFH,0FFH,000H,000H,000H,000H,000H,000H,000H
+0DFC 0000FFFF                
+0E00 FF000000                
+0E04 00000000                
+0E08 00000000       1431     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0E0C 00000000                
+0E10 00000000                
+0E14 00000000                
+0E18 00000000       1432     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0E1C 00000000                
+0E20 00000000                
+0E24 00000000                
+0E28 00000000       1433     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0E2C 00000000                
+0E30 00000000                
+0E34 00000000                
+0E38 00000000       1434     DB  000H,000H,000H,000H,000H,000H,000H,01FH,01FH,01FH,000H,000H,000H,000H,000H,000H
+0E3C 0000001F                
+0E40 1F1F0000                
+0E44 00000000                
+0E48 00000000       1435     DB  000H,000H,000H,000H,000H,000H,000H,000H,01FH,01FH,01FH,000H,000H,000H,000H,000H
+0E4C 00000000                
+0E50 1F1F1F00                
+0E54 00000000                
+0E58 00000000       1436     DB  000H,000H,000H,000H,001H,003H,007H,00FH,00EH,00EH,01CH,01CH,01CH,01CH,01CH,01CH
+0E5C 0103070F                
+0E60 0E0E1C1C                
+0E64 1C1C1C1C                
+0E68 1C0E0E0F       1437     DB  01CH,00EH,00EH,00FH,007H,003H,001H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0E6C 07030100                
+0E70 00000000                
+0E74 00000000                
+0E78 00000000       1438     DB  000H,000H,000H,000H,000H,000H,01FH,01FH,01FH,000H,000H,000H,000H,000H,000H,000H
+0E7C 00001F1F                
+0E80 1F000000                
+0E84 00000000                
+0E88 00000000       1439     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0E8C 00000000                
+0E90 00000000                
+0E94 00000000                
+0E98 00000000       1440     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0E9C 00000000                
+0EA0 00000000                
+0EA4 00000000                
+0EA8 00000000       1441     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0EAC 00000000                
+0EB0 00000000                
+0EB4 00000000                
+0EB8 00000000       1442     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0EBC 00000000                
+0EC0 00000000                
+0EC4 00000000                
+0EC8 00000000       1443     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0ECC 00000000                
+0ED0 00000000                
+0ED4 00000000                
+0ED8 00000000       1444     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0EDC 00000000                
+0EE0 00000000                
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    27
+
+0EE4 00000000                
+0EE8 00000000       1445     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0EEC 00000000                
+0EF0 00000000                
+0EF4 00000000                
+0EF8 00000000       1446     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0EFC 00000000                
+0F00 00000000                
+0F04 00000000                
+0F08 00000000       1447     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0F0C 00000000                
+0F10 00000000                
+0F14 00000000                
+0F18 00000000       1448     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0F1C 00000000                
+0F20 00000000                
+0F24 00000000                
+0F28 00000000       1449     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0F2C 00000000                
+0F30 00000000                
+0F34 00000000                
+0F38 00000000       1450     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0F3C 00000000                
+0F40 00000000                
+0F44 00000000                
+0F48 00000000       1451     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0F4C 00000000                
+0F50 00000000                
+0F54 00000000                
+0F58 00000000       1452     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0F5C 00000000                
+0F60 00000000                
+0F64 00000000                
+0F68 00000000       1453     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0F6C 00000000                
+0F70 00000000                
+0F74 00000000                
+0F78 00000000       1454     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0F7C 00000000                
+0F80 00000000                
+0F84 00000000                
+0F88 00000000       1455     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0F8C 00000000                
+0F90 00000000                
+0F94 00000000                
+0F98 00000000       1456     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0F9C 00000000                
+0FA0 00000000                
+0FA4 00000000                
+0FA8                1457     TAB_COLD:
+                    1458     ;;;;;;;;;;;;;;;;;
+                    1459     ;COLD
+                    1460     ;--  ¿í¶Èx¸ß¶È=128x64  --
+0FA8 00000000       1461     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0FAC 00000000                
+0FB0 00000000                
+0FB4 00000000                
+0FB8 00000000       1462     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0FBC 00000000                
+0FC0 00000000                
+0FC4 00000000                
+0FC8 00000000       1463     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0FCC 00000000                
+0FD0 00000000                
+0FD4 00000000                
+0FD8 00000000       1464     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    28
+
+0FDC 00000000                
+0FE0 00000000                
+0FE4 00000000                
+0FE8 00000000       1465     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0FEC 00000000                
+0FF0 00000000                
+0FF4 00000000                
+0FF8 00000000       1466     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+0FFC 00000000                
+1000 00000000                
+1004 00000000                
+1008 00000000       1467     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+100C 00000000                
+1010 00000000                
+1014 00000000                
+1018 00000000       1468     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+101C 00000000                
+1020 00000000                
+1024 00000000                
+1028 00000000       1469     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+102C 00000000                
+1030 00000000                
+1034 00000000                
+1038 00000000       1470     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+103C 00000000                
+1040 00000000                
+1044 00000000                
+1048 00000000       1471     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+104C 00000000                
+1050 00000000                
+1054 00000000                
+1058 00000000       1472     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+105C 00000000                
+1060 00000000                
+1064 00000000                
+1068 00000000       1473     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+106C 00000000                
+1070 00000000                
+1074 00000000                
+1078 00000000       1474     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+107C 00000000                
+1080 00000000                
+1084 00000000                
+1088 00000000       1475     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+108C 00000000                
+1090 00000000                
+1094 00000000                
+1098 00000000       1476     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+109C 00000000                
+10A0 00000000                
+10A4 00000000                
+10A8 00000000       1477     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,080H,0C0H,0E0H
+10AC 00000000                
+10B0 00000000                
+10B4 0080C0E0                
+10B8 E0F07078       1478     DB  0E0H,0F0H,070H,078H,038H,038H,038H,038H,038H,038H,038H,070H,070H,0F0H,0E0H,0E0H
+10BC 38383838                
+10C0 38383870                
+10C4 70F0E0E0                
+10C8 00000000       1479     DB  000H,000H,000H,000H,000H,000H,000H,080H,0C0H,0E0H,0F0H,070H,070H,038H,038H,038H
+10CC 00000080                
+10D0 C0E0F070                
+10D4 70383838                
+10D8 38383838       1480     DB  038H,038H,038H,038H,070H,070H,0F0H,0E0H,0C0H,080H,000H,000H,000H,000H,000H,000H
+10DC 7070F0E0                
+10E0 C0800000                
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    29
+
+10E4 00000000                
+10E8 000000F0       1481     DB  000H,000H,000H,0F0H,0F0H,0F0H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+10EC F0F00000                
+10F0 00000000                
+10F4 00000000                
+10F8 00000000       1482     DB  000H,000H,000H,000H,000H,000H,000H,000H,0F0H,0F0H,0F0H,070H,070H,070H,070H,070H
+10FC 00000000                
+1100 F0F0F070                
+1104 70707070                
+1108 70707070       1483     DB  070H,070H,070H,070H,0F0H,0E0H,0E0H,0E0H,0C0H,080H,080H,000H,000H,000H,000H,000H
+110C F0E0E0E0                
+1110 C0808000                
+1114 00000000                
+1118 00000000       1484     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+111C 00000000                
+1120 00000000                
+1124 00000000                
+1128 00000000       1485     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,0E0H,0FCH,0FFH,0FFH,00FH,003H
+112C 00000000                
+1130 0000E0FC                
+1134 FFFF0F03                
+1138 01000000       1486     DB  001H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,001H
+113C 00000000                
+1140 00000000                
+1144 00000001                
+1148 00000000       1487     DB  000H,000H,000H,000H,0E0H,0FCH,0FFH,0FFH,00FH,003H,000H,000H,000H,000H,000H,000H
+114C E0FCFFFF                
+1150 0F030000                
+1154 00000000                
+1158 00000000       1488     DB  000H,000H,000H,000H,000H,000H,000H,003H,00FH,0FFH,0FFH,0FCH,0E0H,000H,000H,000H
+115C 00000003                
+1160 0FFFFFFC                
+1164 E0000000                
+1168 000000FF       1489     DB  000H,000H,000H,0FFH,0FFH,0FFH,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+116C FFFF0000                
+1170 00000000                
+1174 00000000                
+1178 00000000       1490     DB  000H,000H,000H,000H,000H,000H,000H,000H,0FFH,0FFH,0FFH,000H,000H,000H,000H,000H
+117C 00000000                
+1180 FFFFFF00                
+1184 00000000                
+1188 00000000       1491     DB  000H,000H,000H,000H,000H,000H,001H,001H,003H,007H,01FH,0FFH,0FCH,0F0H,080H,000H
+118C 00000101                
+1190 03071FFF                
+1194 FCF08000                
+1198 00000000       1492     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+119C 00000000                
+11A0 00000000                
+11A4 00000000                
+11A8 00000000       1493     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,01FH,0FFH,0FFH,0FFH,0C0H,000H
+11AC 00000000                
+11B0 00001FFF                
+11B4 FFFFC000                
+11B8 00000000       1494     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+11BC 00000000                
+11C0 00000000                
+11C4 00000000                
+11C8 00000000       1495     DB  000H,000H,000H,000H,01FH,0FFH,0FFH,0FFH,0C0H,000H,000H,000H,000H,000H,000H,000H
+11CC 1FFFFFFF                
+11D0 C0000000                
+11D4 00000000                
+11D8 00000000       1496     DB  000H,000H,000H,000H,000H,000H,000H,000H,0C0H,0FFH,0FFH,0FFH,01FH,000H,000H,000H
+11DC 00000000                
+11E0 C0FFFFFF                
+11E4 1F000000                
+11E8 000000FF       1497     DB  000H,000H,000H,0FFH,0FFH,0FFH,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    30
+
+11EC FFFF0000                
+11F0 00000000                
+11F4 00000000                
+11F8 00000000       1498     DB  000H,000H,000H,000H,000H,000H,000H,000H,0FFH,0FFH,0FFH,000H,000H,000H,000H,000H
+11FC 00000000                
+1200 FFFFFF00                
+1204 00000000                
+1208 00000000       1499     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,0C0H,0FFH,0FFH,07FH,00FH,000H
+120C 00000000                
+1210 0000C0FF                
+1214 FF7F0F00                
+1218 00000000       1500     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+121C 00000000                
+1220 00000000                
+1224 00000000                
+1228 00000000       1501     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,003H,007H,00FH,01FH
+122C 00000000                
+1230 00000000                
+1234 03070F1F                
+1238 1E3C3878       1502     DB  01EH,03CH,038H,078H,070H,070H,070H,070H,070H,070H,070H,038H,038H,03CH,01CH,01EH
+123C 70707070                
+1240 70707038                
+1244 383C1C1E                
+1248 00000000       1503     DB  000H,000H,000H,000H,000H,000H,003H,007H,00FH,01FH,03CH,038H,038H,070H,070H,070H
+124C 00000307                
+1250 0F1F3C38                
+1254 38707070                
+1258 70707070       1504     DB  070H,070H,070H,070H,038H,038H,03CH,01FH,00FH,007H,003H,000H,000H,000H,000H,000H
+125C 38383C1F                
+1260 0F070300                
+1264 00000000                
+1268 0000007F       1505     DB  000H,000H,000H,07FH,07FH,07FH,070H,070H,070H,070H,070H,070H,070H,070H,070H,070H
+126C 7F7F7070                
+1270 70707070                
+1274 70707070                
+1278 70707070       1506     DB  070H,070H,070H,070H,000H,000H,000H,000H,07FH,07FH,07FH,070H,070H,070H,070H,070H
+127C 00000000                
+1280 7F7F7F70                
+1284 70707070                
+1288 70707070       1507     DB  070H,070H,070H,070H,038H,038H,03CH,03CH,01EH,00FH,00FH,003H,001H,000H,000H,000H
+128C 38383C3C                
+1290 1E0F0F03                
+1294 01000000                
+1298 00000000       1508     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+129C 00000000                
+12A0 00000000                
+12A4 00000000                
+12A8 00000000       1509     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+12AC 00000000                
+12B0 00000000                
+12B4 00000000                
+12B8 00000000       1510     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+12BC 00000000                
+12C0 00000000                
+12C4 00000000                
+12C8 00000000       1511     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+12CC 00000000                
+12D0 00000000                
+12D4 00000000                
+12D8 00000000       1512     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+12DC 00000000                
+12E0 00000000                
+12E4 00000000                
+12E8 00000000       1513     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+12EC 00000000                
+12F0 00000000                
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    31
+
+12F4 00000000                
+12F8 00000000       1514     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+12FC 00000000                
+1300 00000000                
+1304 00000000                
+1308 00000000       1515     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+130C 00000000                
+1310 00000000                
+1314 00000000                
+1318 00000000       1516     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+131C 00000000                
+1320 00000000                
+1324 00000000                
+1328 00000000       1517     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+132C 00000000                
+1330 00000000                
+1334 00000000                
+1338 00000000       1518     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+133C 00000000                
+1340 00000000                
+1344 00000000                
+1348 00000000       1519     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+134C 00000000                
+1350 00000000                
+1354 00000000                
+1358 00000000       1520     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+135C 00000000                
+1360 00000000                
+1364 00000000                
+1368 00000000       1521     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+136C 00000000                
+1370 00000000                
+1374 00000000                
+1378 00000000       1522     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+137C 00000000                
+1380 00000000                
+1384 00000000                
+1388 00000000       1523     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+138C 00000000                
+1390 00000000                
+1394 00000000                
+1398 00000000       1524     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+139C 00000000                
+13A0 00000000                
+13A4 00000000                
+13A8                1525     TAB_H_C:
+                    1526     ;;;;;;;;;;;;;;;
+                    1527     ;¸ßµÍ¶¼ÓÐ
+                    1528     ;--  ¿í¶Èx¸ß¶È=128x64  --
+13A8 00000000       1529     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+13AC 00000000                
+13B0 00000000                
+13B4 00000000                
+13B8 00000000       1530     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+13BC 00000000                
+13C0 00000000                
+13C4 00000000                
+13C8 00000000       1531     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+13CC 00000000                
+13D0 00000000                
+13D4 00000000                
+13D8 00000000       1532     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+13DC 00000000                
+13E0 00000000                
+13E4 00000000                
+13E8 00000000       1533     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    32
+
+13EC 00000000                
+13F0 00000000                
+13F4 00000000                
+13F8 00000000       1534     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+13FC 00000000                
+1400 00000000                
+1404 00000000                
+1408 00000000       1535     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+140C 00000000                
+1410 00000000                
+1414 00000000                
+1418 00000000       1536     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+141C 00000000                
+1420 00000000                
+1424 00000000                
+1428 00000000       1537     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+142C 00000000                
+1430 00000000                
+1434 00000000                
+1438 00000000       1538     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+143C 00000000                
+1440 00000000                
+1444 00000000                
+1448 00000000       1539     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+144C 00000000                
+1450 00000000                
+1454 00000000                
+1458 00000000       1540     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+145C 00000000                
+1460 00000000                
+1464 00000000                
+1468 00000000       1541     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+146C 00000000                
+1470 00000000                
+1474 00000000                
+1478 00000000       1542     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+147C 00000000                
+1480 00000000                
+1484 00000000                
+1488 00000000       1543     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+148C 00000000                
+1490 00000000                
+1494 00000000                
+1498 00000000       1544     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+149C 00000000                
+14A0 00000000                
+14A4 00000000                
+14A8 00000000       1545     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+14AC 00000000                
+14B0 00000000                
+14B4 00000000                
+14B8 00000000       1546     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+14BC 00000000                
+14C0 00000000                
+14C4 00000000                
+14C8 00000000       1547     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+14CC 00000000                
+14D0 00000000                
+14D4 00000000                
+14D8 00000000       1548     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+14DC 00000000                
+14E0 00000000                
+14E4 00000000                
+14E8 00000000       1549     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+14EC 00000000                
+14F0 00000000                
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    33
+
+14F4 00000000                
+14F8 00000000       1550     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+14FC 00000000                
+1500 00000000                
+1504 00000000                
+1508 00000000       1551     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+150C 00000000                
+1510 00000000                
+1514 00000000                
+1518 00000000       1552     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+151C 00000000                
+1520 00000000                
+1524 00000000                
+1528 00000000       1553     DB  000H,000H,000H,000H,000H,000H,000H,0F8H,0F8H,0F8H,000H,000H,000H,000H,000H,000H
+152C 000000F8                
+1530 F8F80000                
+1534 00000000                
+1538 00000000       1554     DB  000H,000H,000H,000H,000H,000H,000H,000H,0F8H,0F8H,0F8H,000H,000H,000H,000H,000H
+153C 00000000                
+1540 F8F8F800                
+1544 00000000                
+1548 00000000       1555     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+154C 00000000                
+1550 00000000                
+1554 00000000                
+1558 00000000       1556     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+155C 00000000                
+1560 00000000                
+1564 00000000                
+1568 00000000       1557     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+156C 00000000                
+1570 00000000                
+1574 00000000                
+1578 00000080       1558     DB  000H,000H,000H,080H,0C0H,0E0H,0F0H,0F0H,078H,038H,03CH,01CH,01CH,01CH,01CH,01CH
+157C C0E0F0F0                
+1580 78383C1C                
+1584 1C1C1C1C                
+1588 1C1C3838       1559     DB  01CH,01CH,038H,038H,078H,070H,0F0H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+158C 7870F000                
+1590 00000000                
+1594 00000000                
+1598 00000000       1560     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+159C 00000000                
+15A0 00000000                
+15A4 00000000                
+15A8 00000000       1561     DB  000H,000H,000H,000H,000H,000H,000H,0FFH,0FFH,0FFH,0C0H,0C0H,0C0H,0C0H,0C0H,0C0H
+15AC 000000FF                
+15B0 FFFFC0C0                
+15B4 C0C0C0C0                
+15B8 C0C0C0C0       1562     DB  0C0H,0C0H,0C0H,0C0H,0C0H,0C0H,0C0H,0C0H,0FFH,0FFH,0FFH,000H,000H,000H,000H,000H
+15BC C0C0C0C0                
+15C0 FFFFFF00                
+15C4 00000000                
+15C8 00000000       1563     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+15CC 00000000                
+15D0 00000000                
+15D4 00000000                
+15D8 00000000       1564     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+15DC 00000000                
+15E0 00000000                
+15E4 00000000                
+15E8 00000000       1565     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+15EC 00000000                
+15F0 00000000                
+15F4 00000000                
+15F8 00F0FEFF       1566     DB  000H,0F0H,0FEH,0FFH,0FFH,007H,001H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    34
+
+15FC FF070100                
+1600 00000000                
+1604 00000000                
+1608 00000000       1567     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+160C 00000000                
+1610 00000000                
+1614 00000000                
+1618 00000000       1568     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+161C 00000000                
+1620 00000000                
+1624 00000000                
+1628 00000000       1569     DB  000H,000H,000H,000H,000H,000H,000H,0FFH,0FFH,0FFH,001H,001H,001H,001H,001H,001H
+162C 000000FF                
+1630 FFFF0101                
+1634 01010101                
+1638 01010101       1570     DB  001H,001H,001H,001H,001H,001H,001H,001H,0FFH,0FFH,0FFH,000H,000H,000H,000H,000H
+163C 01010101                
+1640 FFFFFF00                
+1644 00000000                
+1648 00001C1C       1571     DB  000H,000H,01CH,01CH,01CH,01CH,01CH,01CH,01CH,01CH,01CH,01CH,000H,000H,000H,000H
+164C 1C1C1C1C                
+1650 1C1C1C1C                
+1654 00000000                
+1658 00001C1C       1572     DB  000H,000H,01CH,01CH,01CH,01CH,01CH,01CH,01CH,01CH,01CH,01CH,000H,000H,000H,000H
+165C 1C1C1C1C                
+1660 1C1C1C1C                
+1664 00000000                
+1668 00001C1C       1573     DB  000H,000H,01CH,01CH,01CH,01CH,01CH,01CH,01CH,01CH,01CH,01CH,000H,000H,000H,000H
+166C 1C1C1C1C                
+1670 1C1C1C1C                
+1674 00000000                
+1678 000F7FFF       1574     DB  000H,00FH,07FH,0FFH,0FFH,0E0H,080H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+167C FFE08000                
+1680 00000000                
+1684 00000000                
+1688 00000000       1575     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+168C 00000000                
+1690 00000000                
+1694 00000000                
+1698 00000000       1576     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+169C 00000000                
+16A0 00000000                
+16A4 00000000                
+16A8 00000000       1577     DB  000H,000H,000H,000H,000H,000H,000H,03FH,03FH,03FH,000H,000H,000H,000H,000H,000H
+16AC 0000003F                
+16B0 3F3F0000                
+16B4 00000000                
+16B8 00000000       1578     DB  000H,000H,000H,000H,000H,000H,000H,000H,03FH,03FH,03FH,000H,000H,000H,000H,000H
+16BC 00000000                
+16C0 3F3F3F00                
+16C4 00000000                
+16C8 00000000       1579     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+16CC 00000000                
+16D0 00000000                
+16D4 00000000                
+16D8 00000000       1580     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+16DC 00000000                
+16E0 00000000                
+16E4 00000000                
+16E8 00000000       1581     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+16EC 00000000                
+16F0 00000000                
+16F4 00000000                
+16F8 00000001       1582     DB  000H,000H,000H,001H,003H,007H,00FH,00FH,01EH,01CH,03CH,038H,038H,038H,038H,038H
+16FC 03070F0F                
+1700 1E1C3C38                
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    35
+
+1704 38383838                
+1708 38381C1C       1583     DB  038H,038H,01CH,01CH,01EH,00EH,00FH,000H,000H,000H,000H,000H,000H,000H,000H,000H
+170C 1E0E0F00                
+1710 00000000                
+1714 00000000                
+1718 00000000       1584     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+171C 00000000                
+1720 00000000                
+1724 00000000                
+1728 00000000       1585     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+172C 00000000                
+1730 00000000                
+1734 00000000                
+1738 00000000       1586     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+173C 00000000                
+1740 00000000                
+1744 00000000                
+1748 00000000       1587     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+174C 00000000                
+1750 00000000                
+1754 00000000                
+1758 00000000       1588     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+175C 00000000                
+1760 00000000                
+1764 00000000                
+1768 00000000       1589     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+176C 00000000                
+1770 00000000                
+1774 00000000                
+1778 00000000       1590     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+177C 00000000                
+1780 00000000                
+1784 00000000                
+1788 00000000       1591     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+178C 00000000                
+1790 00000000                
+1794 00000000                
+1798 00000000       1592     DB  000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H,000H
+179C 00000000                
+17A0 00000000                
+17A4 00000000                
+                    1593             END      
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    36
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+ACC. . . . . . . .  D ADDR   00E0H   A   
+AK1. . . . . . . .  C ADDR   00C3H   A   
+AK2. . . . . . . .  C ADDR   011AH   A   
+ALARM. . . . . . .  C ADDR   006DH   A   
+ALARM_END. . . . .  C ADDR   011AH   A   
+ALARM_END1 . . . .  C ADDR   00C3H   A   
+ALARM_MUSIC. . . .  C ADDR   0168H   A   
+ALARM_OK . . . . .  C ADDR   006AH   A   
+ALARM_ZHENG1 . . .  C ADDR   0086H   A   
+ALARM_ZHENG2 . . .  C ADDR   00DCH   A   
+ALOP1. . . . . . .  C ADDR   00BDH   A   
+ALOP2. . . . . . .  C ADDR   0114H   A   
+ANQUAN1. . . . . .  C ADDR   00B5H   A   
+ANQUAN2. . . . . .  C ADDR   010CH   A   
+B. . . . . . . . .  D ADDR   00F0H   A   
+BAISHIGE . . . . .  C ADDR   063EH   A   
+BAISHIGE1. . . . .  C ADDR   0660H   A   
+BAISHIGE11 . . . .  C ADDR   070AH   A   
+BAISHIGE2. . . . .  C ADDR   06E8H   A   
+BAI_1. . . . . . .  C ADDR   0654H   A   
+BAI_11 . . . . . .  C ADDR   06FEH   A   
+CLEAR_SCREEN . . .  C ADDR   -----       EXT
+CONUT_ALARM. . . .  N NUMB   0050H   A   
+CONUT_DS . . . . .  N NUMB   0042H   A   
+D130 . . . . . . .  C ADDR   02CAH   A   
+DAY. . . . . . . .  N NUMB   0033H   A   
+DEL0 . . . . . . .  C ADDR   02CCH   A   
+DEL1 . . . . . . .  C ADDR   02CEH   A   
+DISPLAY_BMP. . . .  C ADDR   -----       EXT
+DISPLAY_LCD. . . .  C ADDR   -----       EXT
+DISP_1302_LCD. . .  C ADDR   0829H   A   
+DIWEN. . . . . . .  C ADDR   013CH   A   
+DPH. . . . . . . .  D ADDR   0083H   A   
+DPL. . . . . . . .  D ADDR   0082H   A   
+DQ . . . . . . . .  B ADDR   0090H.5 A   
+DS1302_INIT. . . .  C ADDR   -----       EXT
+DS18B20_TEMP . . .  C ADDR   0614H   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+FLAG . . . . . . .  B ADDR   0020H.0 A   
+FUSHU. . . . . . .  C ADDR   0632H   A   
+FUSHU1 . . . . . .  C ADDR   06DCH   A   
+GET1302. . . . . .  C ADDR   -----       EXT
+HEX_BCD. . . . . .  C ADDR   -----       EXT
+HHALARM1 . . . . .  C ADDR   0090H   A   
+HHALARM2 . . . . .  C ADDR   00E6H   A   
+HK1. . . . . . . .  C ADDR   00A0H   A   
+HK2. . . . . . . .  C ADDR   00F6H   A   
+HLOP1. . . . . . .  C ADDR   009AH   A   
+HLOP2. . . . . . .  C ADDR   00F0H   A   
+HLWEN. . . . . . .  C ADDR   014DH   A   
+HOUR . . . . . . .  N NUMB   0032H   A   
+IE . . . . . . . .  D ADDR   00A8H   A   
+INIT_LCD . . . . .  C ADDR   -----       EXT
+INT0P. . . . . . .  C ADDR   02D5H   A   
+INT1P. . . . . . .  C ADDR   047CH   A   
+INTOP_END. . . . .  C ADDR   0476H   A   
+IT0. . . . . . . .  B ADDR   0088H.0 A   
+IT1. . . . . . . .  B ADDR   0088H.2 A   
+KADD . . . . . . .  B ADDR   00A0H.7 A   
+KADD1_H. . . . . .  C ADDR   03A6H   A   
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    37
+
+KADD1_L. . . . . .  C ADDR   03C9H   A   
+KADD2_H. . . . . .  C ADDR   043DH   A   
+KADD2_L. . . . . .  C ADDR   0460H   A   
+KDEC . . . . . . .  B ADDR   0090H.6 A   
+KDEC1_H. . . . . .  C ADDR   0399H   A   
+KDEC1_L. . . . . .  C ADDR   03BCH   A   
+KDEC2_H. . . . . .  C ADDR   0430H   A   
+KDEC2_L. . . . . .  C ADDR   0453H   A   
+KOK. . . . . . . .  B ADDR   00B0H.5 A   
+KOK1_H . . . . . .  C ADDR   03B3H   A   
+KOK1_L . . . . . .  C ADDR   03D6H   A   
+KOK2_H . . . . . .  C ADDR   044AH   A   
+KOK2_L . . . . . .  C ADDR   046DH   A   
+LCD_CS1. . . . . .  B ADDR   00A0H.4 A   
+LCD_CS2. . . . . .  B ADDR   00A0H.3 A   
+LCD_E. . . . . . .  B ADDR   00A0H.0 A   
+LCD_MOD1 . . . . .  C ADDR   0769H   A   
+LCD_MOD2 . . . . .  C ADDR   0493H   A   
+LCD_RS . . . . . .  B ADDR   00A0H.2 A   
+LCD_RW . . . . . .  B ADDR   00A0H.1 A   
+LK1. . . . . . . .  C ADDR   00B2H   A   
+LK2. . . . . . . .  C ADDR   0109H   A   
+LLALARM1 . . . . .  C ADDR   00A3H   A   
+LLALARM2 . . . . .  C ADDR   00F9H   A   
+LLOP1. . . . . . .  C ADDR   00ADH   A   
+LLOP2. . . . . . .  C ADDR   0103H   A   
+LOOP . . . . . . .  C ADDR   016EH   A   
+LOOP1. . . . . . .  C ADDR   018FH   A   
+MAIN0. . . . . . .  C ADDR   0030H   A   
+MINUTE . . . . . .  N NUMB   0031H   A   
+MONTH. . . . . . .  N NUMB   0034H   A   
+MRD. . . . . . . .  N NUMB   003AH   A   
+MTD. . . . . . . .  N NUMB   0039H   A   
+MUSIC0 . . . . . .  N NUMB   0048H   A   
+MUSIC1 . . . . . .  N NUMB   0049H   A   
+NEXT . . . . . . .  C ADDR   017FH   A   
+NEXT1. . . . . . .  C ADDR   0189H   A   
+OK . . . . . . . .  B ADDR   00A0H.6 A   
+OK0. . . . . . . .  C ADDR   0303H   A   
+OK1. . . . . . . .  C ADDR   0336H   A   
+OK2. . . . . . . .  C ADDR   036CH   A   
+OK3. . . . . . . .  C ADDR   0393H   A   
+OK4. . . . . . . .  C ADDR   0403H   A   
+OK5. . . . . . . .  C ADDR   042AH   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+P3 . . . . . . . .  D ADDR   00B0H   A   
+PANDUAN0 . . . . .  C ADDR   02DFH   A   
+PANXIA . . . . . .  C ADDR   0312H   A   
+PCON . . . . . . .  D ADDR   0087H   A   
+PSW. . . . . . . .  D ADDR   00D0H   A   
+QANQUAN. . . . . .  C ADDR   0167H   A   
+RCVBYTE. . . . . .  C ADDR   -----       EXT
+READ_BYTE. . . . .  C ADDR   -----       EXT
+READ_TEMP. . . . .  C ADDR   -----       EXT
+SBUF . . . . . . .  D ADDR   0099H   A   
+SCL. . . . . . . .  B ADDR   0090H.0 A   
+SCON . . . . . . .  D ADDR   0098H   A   
+SDA. . . . . . . .  B ADDR   0090H.1 A   
+SECOND . . . . . .  N NUMB   0030H   A   
+SELECT . . . . . .  B ADDR   00A0H.5 A   
+SELECT0. . . . . .  C ADDR   02FAH   A   
+SELECT01 . . . . .  C ADDR   0309H   A   
+SELECT1. . . . . .  C ADDR   033FH   A   
+SELECT2. . . . . .  C ADDR   0363H   A   
+SELECT22 . . . . .  C ADDR   032DH   A   
+A51 MACRO ASSEMBLER  MAIN                                                                 07/10/2013 09:54:14 PAGE    38
+
+SELECT3. . . . . .  C ADDR   038AH   A   
+SELECT4. . . . . .  C ADDR   03FAH   A   
+SELECT5. . . . . .  C ADDR   0421H   A   
+SELECT_1820_1. . .  C ADDR   0348H   A   
+SELECT_1820_1_H. .  C ADDR   0399H   A   
+SELECT_1820_1_L. .  C ADDR   03BCH   A   
+SELECT_1820_2. . .  C ADDR   03DFH   A   
+SELECT_1820_2_H. .  C ADDR   0430H   A   
+SELECT_1820_2_L. .  C ADDR   0453H   A   
+SELECT_SCREEN. . .  C ADDR   -----       EXT
+SENDBYTE . . . . .  C ADDR   -----       EXT
+SET_LINE . . . . .  C ADDR   -----       EXT
+SLA. . . . . . . .  N NUMB   0037H   A   
+SMAIN. . . . . . .  C ADDR   005BH   A   
+SP . . . . . . . .  D ADDR   0081H   A   
+SPEALER. . . . . .  B ADDR   0090H.7 A   
+START. . . . . . .  C ADDR   -----       EXT
+STOP . . . . . . .  C ADDR   -----       EXT
+SUBA . . . . . . .  N NUMB   0038H   A   
+TAB0_9 . . . . . .  C ADDR   0AA0H   A   
+TAB_COLD . . . . .  C ADDR   0FA8H   A   
+TAB_DI . . . . . .  C ADDR   01F3H   A   
+TAB_GAO. . . . . .  C ADDR   0197H   A   
+TAB_GAO_DI . . . .  C ADDR   0270H   A   
+TAB_HOT. . . . . .  C ADDR   0BA8H   A   
+TAB_H_C. . . . . .  C ADDR   13A8H   A   
+TAB_WEN. . . . . .  C ADDR   09E0H   A   
+TAB_YMD. . . . . .  C ADDR   0A28H   A   
+TAB_ZF . . . . . .  C ADDR   0968H   A   
+TEMPH. . . . . . .  N NUMB   003DH   A   
+TEMPHC . . . . . .  N NUMB   0040H   A   
+TEMPHH1. . . . . .  N NUMB   0043H   A   
+TEMPHH2. . . . . .  N NUMB   0045H   A   
+TEMPL. . . . . . .  N NUMB   003CH   A   
+TEMPLC . . . . . .  N NUMB   0041H   A   
+TEMPLL1. . . . . .  N NUMB   0044H   A   
+TEMPLL2. . . . . .  N NUMB   0046H   A   
+TEMP_LED . . . . .  N NUMB   0047H   A   
+TEMP_TH. . . . . .  N NUMB   003EH   A   
+TEMP_TL. . . . . .  N NUMB   003FH   A   
+TEMP_ZH. . . . . .  N NUMB   003BH   A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TI . . . . . . . .  B ADDR   0098H.1 A   
+TIME1. . . . . . .  C ADDR   02C3H   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+T_CLK. . . . . . .  B ADDR   0090H.3 A   
+T_IO . . . . . . .  B ADDR   0090H.4 A   
+T_RST. . . . . . .  B ADDR   0090H.2 A   
+WAITACK. . . . . .  C ADDR   -----       EXT
+WEEK . . . . . . .  N NUMB   0035H   A   
+WEN_END. . . . . .  C ADDR   015CH   A   
+WRITE_BYTE . . . .  C ADDR   -----       EXT
+XZF. . . . . . . .  C ADDR   0187H   A   
+YEAR . . . . . . .  N NUMB   0036H   A   
+ZHENG. . . . . . .  C ADDR   0623H   A   
+ZHENG1 . . . . . .  C ADDR   06CDH   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

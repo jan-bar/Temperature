@@ -1,0 +1,229 @@
+A51 MACRO ASSEMBLER  AMPIRE128X64                                                         07/10/2013 09:53:45 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02
+OBJECT MODULE PLACED IN AMPIRE128X64.OBJ
+ASSEMBLER INVOKED BY: E:\Program Files\danpianji\Keil\C51\BIN\A51.EXE AMPIRE128X64.a51 SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     PUBLIC          SET_LINE,DISPLAY_BMP,DISPLAY_LCD,CLEAR_SCREEN,CLR_LCD,INIT_LCD,SELECT_SCREE
+                             N
+                       2     CODE_LCD        SEGMENT         CODE
+  00A2                 3     LCD_RS          BIT                     P2.2
+  00A1                 4     LCD_RW          BIT                     P2.1
+  00A0                 5     LCD_E           BIT                     P2.0
+  00A4                 6     LCD_CS1         BIT                     P2.4    ;µÍµçÆ½ÓÐÐ§£¬×ó°ëÆÁ
+  00A3                 7     LCD_CS2         BIT                     P2.3    ;µÍµçÆ½ÓÐÐ§£¬ÓÒ°ëÆÁ
+                       8     ;;;;;;;;;;;;;;;;;;;;;;;;;
+----                   9     RSEG            CODE_LCD
+                      10     ;;;;;;;;;;;;;;;;;;;;;;;;;¼ì²éÃ¦µÈ´
+0000 758000           11     CHEC_BUSY:                      MOV             P0,#00H
+0003 C2A2             12                                             CLR             LCD_RS
+0005 D2A1             13                                             SETB    LCD_RW
+0007 D2A0             14                                             SETB    LCD_E
+0009 2087FD           15                                             JB              P0.7,$
+000C C2A0             16                                             CLR             LCD_E
+000E 22               17                                             RET
+                      18     ;;;;;;;;;;;;;;;;;;;;;;;;;
+000F                  19     CLR_LCD:
+000F 22               20                                             RET
+                      21     ;;;;;;;;;;;;;;;;;;;;;;;;;
+0010 120000   F       22     WRITE_IR:                       LCALL   CHEC_BUSY
+0013 C2A2             23                                             CLR             LCD_RS
+0015 C2A1             24                                             CLR             LCD_RW
+0017 F580             25                                             MOV             P0,A    ;P0×÷ÎªÊ¾Ý¿Ú
+0019 D2A0             26                                             SETB    LCD_E
+001B 00               27                                             NOP
+001C 00               28                                             NOP
+001D C2A0             29                                             CLR             LCD_E   
+001F 22               30                                             RET
+                      31     ;;;;;;;;;;;;;;;;;;;;;;;;;
+0020 120000   F       32     WRITE_DR:                       LCALL   CHEC_BUSY
+0023 D2A2             33                                             SETB    LCD_RS
+0025 C2A1             34                                             CLR             LCD_RW
+0027 F580             35                                             MOV             P0,A
+0029 D2A0             36                                             SETB    LCD_E
+002B 00               37                                             NOP
+002C 00               38                                             NOP
+002D C2A0             39                                             CLR             LCD_E
+002F 22               40                                             RET
+                      41     ;;;;;;;;;;;;;;;;;;;;;;;;;ÉèÖÃ"Ò³"LCD12864¹²8Ò³£¬Ò»Ò³ÊÇ8ÐÐµãÕóµã
+0030 44B8             42     SET_PAGE:                       ORL             A,#0B8H ;Ò³µÄÊ×µØÖ·Îª0xB8
+0032 120000   F       43                                             LCALL   WRITE_IR
+0035 22               44                                             RET
+                      45     ;;;;;;;;;;;;;;;;;;;;;;;;;ÉèÖÃÏÔÊ¾µÄÆðÊ¼ÐÐ
+0036 44C0             46     SET_LINE:                       ORL             A,#0C0H ;ÆðÊ¼ÐÐµØÖ·Îª0xC0
+0038 120000   F       47                                             LCALL   WRITE_IR;ÉèÖÃ´ÓÄÄÐÐ¿ªÊ¼£º¹²0--63;Ò»°ã´Ó0 ÐÐ
+                             ¿ªÊ¼ÏÔÊ¾
+003B 22               48                                             RET
+                      49     ;;;;;;;;;;;;;;;;;;;;;;;;;ÉèÖÃÏÔÊ¾µÄÁÐ
+003C 543F             50     SET_COLUMN:                     ANL             A,#3FH  ;ÁÐµÄ×î´óÖµÎª64
+003E 4440             51                                             ORL             A,#40H  ;ÁÐµÄÊ×µØÖ·Îª0x40
+0040 120000   F       52                                             LCALL   WRITE_IR;¹æ¶¨ÏÔÊ¾µÄÁÐµÄÎ»ÖÃ
+0043 22               53                                             RET
+                      54     ;;;;;;;;;;;;;;;;;;;;;;;;;ÏÔÊ¾¿ª¹Øº¯Ê£º0x3EÊÇ¹ØÏÔÊ¾£¬0x3FÊÇ¿ªÏÔÊ¾
+0044 443E             55     SET_ON_OFF:                     ORL             A,#3EH  ;0011 111x,onoffÖ»ÄÜÎª0»òÕß1
+0046 120000   F       56                                             LCALL   WRITE_IR
+A51 MACRO ASSEMBLER  AMPIRE128X64                                                         07/10/2013 09:53:45 PAGE     2
+
+0049 22               57                                             RET
+                      58     ;;;;;;;;;;;;;;;;;;;;;;;;;Ñ¡ÔñÆÁÄ»
+004A B40006           59     SELECT_SCREEN:          CJNE    A,#0,SELECTN0
+                      60                                             ;0È«ÆÁ
+004D C2A4             61                                             CLR             LCD_CS1
+004F C2A3             62                                             CLR             LCD_CS2
+0051 0100     F       63                                             AJMP    SELECT_END
+0053 B40106           64     SELECTN0:                       CJNE    A,#1,SELECTN1
+                      65                                             ;1×ó°ëÆÁ
+0056 C2A4             66                                             CLR             LCD_CS1
+0058 D2A3             67                                             SETB    LCD_CS2
+005A 0100     F       68                                             AJMP    SELECT_END
+005C B40204           69     SELECTN1:                       CJNE    A,#2,SELECTN2
+                      70                                             ;2ÓÒ°ëÆÁ
+005F C2A3             71                                             CLR             LCD_CS2
+0061 D2A4             72                                             SETB    LCD_CS1
+0063                  73     SELECTN2:
+0063 22               74     SELECT_END:                     RET
+                      75     ;;;;;;;;;;;;;;;;;;;;;;;;;ÇåÆÁº¯Ê
+0064 120000   F       76     CLEAR_SCREEN:           LCALL   SELECT_SCREEN;0--È«ÆÁ£»1---×ó°ëÆÁ£»2---ÓÒ°ëÆÁ
+0067 7F00             77                                             MOV             R7,#0   ;¿ØÖÆÒ³Ê0-7£¬¹²8Ò³
+0069 EF               78     CLR_K1:                         MOV             A,R7
+006A 120000   F       79                                             LCALL   SET_PAGE
+006D 7400             80                                             MOV             A,#0
+006F 120000   F       81                                             LCALL   SET_COLUMN
+0072 7E00             82                                             MOV             R6,#0   ;¿ØÖÆÁÐÊ0-63£¬¹²64ÁÐ
+0074 E4               83                                             CLR             A       ;0
+0075 120000   F       84     CLR_K0:                         LCALL   WRITE_DR;Ð´Èë0£¬µØÖ·Ö¸Õë×Ô¼Ó1
+0078 0E               85                                             INC             R6
+0079 BE40F9           86                                             CJNE    R6,#64,CLR_K0
+007C 0F               87                                             INC             R7
+007D BF08E9           88                                             CJNE    R7,#8,CLR_K1
+0080 22               89                                             RET
+                      90     ;;;;;;;;;;;;;;;;;;;;;;;;;LCDµÄ³õÊ¼»¯
+0081 120000   F       91     INIT_LCD:                       LCALL   CHEC_BUSY
+0084 E4               92                                             CLR             A;Ñ¡ÔñÈ«ÆÁ
+0085 120000   F       93                                             LCALL   SELECT_SCREEN
+0088 E4               94                                             CLR             A;¹Ø±ÕÏÔÊ¾
+0089 120000   F       95                                             LCALL   SET_ON_OFF
+008C E4               96                                             CLR             A;Ñ¡ÔñÈ«ÆÁ
+008D 120000   F       97                                             LCALL   SELECT_SCREEN
+0090 7401             98                                             MOV             A,#01H;¿ªÆôÏÔÊ¾
+0092 120000   F       99                                             LCALL   SET_ON_OFF
+0095 E4              100                                             CLR             A;Ñ¡ÔñÈ«ÆÁ
+0096 120000   F      101                                             LCALL   SELECT_SCREEN
+0099 E4              102                                             CLR             A;ÇåÆÁ
+009A 120000   F      103                                             LCALL   CLEAR_SCREEN
+009D E4              104                                             CLR             A;¿ªÊ¼ÐÐ0
+009E 120000   F      105                                             LCALL   SET_LINE        
+00A1 22              106                                             RET
+                     107     ;;;;;;;;;;;;;;;;;;;;;;;;;ÏÔÊ¾ºº×Ö×Ó³ÌÐò
+00A2                 108     DISPLAY_LCD:;R5´«ÈëÇåÄÇ°ëÆÁ,R6´«ÈëÒ³,R7´«ÈëÁÐ£¬DPTR´«Èë×ÖÄ£±í
+00A2 ED              109                                             MOV             A,R5
+00A3 120000   F      110                                             LCALL   SELECT_SCREEN;Ñ¡ÔñÆÁÄ»
+00A6 EE              111                                             MOV             A,R6
+00A7 120000   F      112                                             LCALL   SET_PAGE;Ñ¡ÉÏ°ëÒ³
+00AA EF              113                                             MOV             A,R7
+00AB 120000   F      114                                             LCALL   SET_COLUMN;¿ØÖÆÁÐ
+00AE 7D00            115                                             MOV             R5,#0  ;¿ØÖÆ16ÁÐµÄÊ¾ÝÊä³ö
+00B0 ED              116     DISP_K0:                        MOV             A,R5
+00B1 93              117                                             MOVC    A,@A+DPTR
+00B2 120000   F      118                                             LCALL   WRITE_DR;Ñ¡Ôñ²é³öµÄ×ÖÄ£
+00B5 0D              119                                             INC             R5
+00B6 BD0CF7          120                                             CJNE    R5,#12,DISP_K0
+                     121     
+00B9 EE              122                                             MOV             A,R6
+A51 MACRO ASSEMBLER  AMPIRE128X64                                                         07/10/2013 09:53:45 PAGE     3
+
+00BA 04              123                                             INC             A
+00BB 120000   F      124                                             LCALL   SET_PAGE;Ñ¡ÏÂ°ëÒ³
+00BE EF              125                                             MOV             A,R7
+00BF 120000   F      126                                             LCALL   SET_COLUMN;¿ØÖÆÁÐ
+00C2 7D00            127                                             MOV             R5,#0  ;¿ØÖÆ16ÁÐµÄÊ¾ÝÊä³ö
+00C4 ED              128     DISP_K1:                        MOV             A,R5
+00C5 240C            129                                             ADD             A,#12
+00C7 93              130                                             MOVC    A,@A+DPTR
+00C8 120000   F      131                                             LCALL   WRITE_DR;Ñ¡Ôñ²é³öµÄ×ÖÄ£
+00CB 0D              132                                             INC             R5
+00CC BD0CF5          133                                             CJNE    R5,#12,DISP_K1
+00CF 22              134                                             RET
+                     135     ;;;;;;;;;;;;;;;;;;;;;;;;;ÏÔÊ¾BMPÍ¼Æ¬
+00D0                 136     DISPLAY_BMP:;DPTRÎªÍ¼Æ¬È¡Ä£±íÊ×Ö·
+00D0 7F00            137                                             MOV             R7,#0
+00D2 7401            138     DISP_BMP_K2:            MOV             A,#1
+00D4 120000   F      139                                             LCALL   SELECT_SCREEN;Ñ¡Ôñ×ó°ëÆÁ
+00D7 EF              140                                             MOV             A,R7
+00D8 120000   F      141                                             LCALL   SET_PAGE;Ñ¡ÔñÒ³
+00DB E4              142                                             CLR             A
+00DC 120000   F      143                                             LCALL   SET_COLUMN;Ñ¡ÔñµÚ0ÁÐ
+00DF 7E00            144                                             MOV             R6,#0
+00E1 E4              145     DISP_BMP_K0:            CLR             A;
+00E2 93              146                                             MOVC    A,@A+DPTR
+00E3 120000   F      147                                             LCALL   WRITE_DR;Ã¿¸ôÒ»ÐÐÈ¡Ò»´ÎÊ×éÖÐµÄÊ¾Ý
+00E6 0E              148                                             INC             R6
+00E7 A3              149                                             INC             DPTR
+00E8 BE40F6          150                                             CJNE    R6,#64,DISP_BMP_K0
+00EB 7402            151                                             MOV             A,#2
+00ED 120000   F      152                                             LCALL   SELECT_SCREEN;Ñ¡ÔñÓÒ°ëÆÁ
+00F0 EF              153                                             MOV             A,R7
+00F1 120000   F      154                                             LCALL   SET_PAGE;Ñ¡ÔñÒ³
+00F4 E4              155                                             CLR             A
+00F5 120000   F      156                                             LCALL   SET_COLUMN;Ñ¡ÔñµÚ0ÁÐ
+00F8 7E00            157                                             MOV             R6,#0
+00FA E4              158     DISP_BMP_K1:            CLR             A;
+00FB 93              159                                             MOVC    A,@A+DPTR
+00FC 120000   F      160                                             LCALL   WRITE_DR;Ã¿¸ôÒ»ÐÐÈ¡Ò»´ÎÊ×éÖÐµÄÊ¾Ý
+00FF 0E              161                                             INC             R6
+0100 A3              162                                             INC             DPTR
+0101 BE40F6          163                                             CJNE    R6,#64,DISP_BMP_K1
+0104 0F              164                                             INC             R7
+0105 BF08CA          165                                             CJNE    R7,#8,DISP_BMP_K2
+0108 22              166                                             RET
+                     167     ;;;;;;;;;;;;;;;;;;;;;;;;;
+                     168             END
+A51 MACRO ASSEMBLER  AMPIRE128X64                                                         07/10/2013 09:53:45 PAGE     4
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+CHEC_BUSY. . . . .  C ADDR   0000H   R   SEG=CODE_LCD
+CLEAR_SCREEN . . .  C ADDR   0064H   R   SEG=CODE_LCD
+CLR_K0 . . . . . .  C ADDR   0075H   R   SEG=CODE_LCD
+CLR_K1 . . . . . .  C ADDR   0069H   R   SEG=CODE_LCD
+CLR_LCD. . . . . .  C ADDR   000FH   R   SEG=CODE_LCD
+CODE_LCD . . . . .  C SEG    0109H       REL=UNIT
+DISPLAY_BMP. . . .  C ADDR   00D0H   R   SEG=CODE_LCD
+DISPLAY_LCD. . . .  C ADDR   00A2H   R   SEG=CODE_LCD
+DISP_BMP_K0. . . .  C ADDR   00E1H   R   SEG=CODE_LCD
+DISP_BMP_K1. . . .  C ADDR   00FAH   R   SEG=CODE_LCD
+DISP_BMP_K2. . . .  C ADDR   00D2H   R   SEG=CODE_LCD
+DISP_K0. . . . . .  C ADDR   00B0H   R   SEG=CODE_LCD
+DISP_K1. . . . . .  C ADDR   00C4H   R   SEG=CODE_LCD
+INIT_LCD . . . . .  C ADDR   0081H   R   SEG=CODE_LCD
+LCD_CS1. . . . . .  B ADDR   00A0H.4 A   
+LCD_CS2. . . . . .  B ADDR   00A0H.3 A   
+LCD_E. . . . . . .  B ADDR   00A0H.0 A   
+LCD_RS . . . . . .  B ADDR   00A0H.2 A   
+LCD_RW . . . . . .  B ADDR   00A0H.1 A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+SELECTN0 . . . . .  C ADDR   0053H   R   SEG=CODE_LCD
+SELECTN1 . . . . .  C ADDR   005CH   R   SEG=CODE_LCD
+SELECTN2 . . . . .  C ADDR   0063H   R   SEG=CODE_LCD
+SELECT_END . . . .  C ADDR   0063H   R   SEG=CODE_LCD
+SELECT_SCREEN. . .  C ADDR   004AH   R   SEG=CODE_LCD
+SET_COLUMN . . . .  C ADDR   003CH   R   SEG=CODE_LCD
+SET_LINE . . . . .  C ADDR   0036H   R   SEG=CODE_LCD
+SET_ON_OFF . . . .  C ADDR   0044H   R   SEG=CODE_LCD
+SET_PAGE . . . . .  C ADDR   0030H   R   SEG=CODE_LCD
+WRITE_DR . . . . .  C ADDR   0020H   R   SEG=CODE_LCD
+WRITE_IR . . . . .  C ADDR   0010H   R   SEG=CODE_LCD
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

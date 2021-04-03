@@ -1,0 +1,154 @@
+A51 MACRO ASSEMBLER  FM24C64                                                              07/10/2013 09:53:46 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02
+OBJECT MODULE PLACED IN FM24C64.OBJ
+ASSEMBLER INVOKED BY: E:\Program Files\danpianji\Keil\C51\BIN\A51.EXE FM24C64.a51 SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     PUBLIC          START,STOP,WAITACK,SENDBYTE,RCVBYTE,WRITE_BYTE,READ_BYTE
+                       2     CODE_I2C        SEGMENT         CODE
+  0090                 3     SCL                     BIT             P1.0
+  0091                 4     SDA                     BIT             P1.1
+  0037                 5     SLA                     EQU             37H
+  0038                 6     SUBA            EQU             38H
+  0039                 7     MTD                     EQU             39H
+  003A                 8     MRD                     EQU             3AH
+----                   9     RSEG            CODE_I2C
+                      10     ;;;;;;;;;;;;;;;;;;;;;;;;;
+0000 D291             11     START:                          SETB    SDA             ;°´ÕÕÊ±Ðò²Ù×÷
+0002 D290             12                                             SETB    SCL
+0004 00               13                                             NOP
+0005 C291             14                                             CLR             SDA
+0007 00               15                                             NOP
+0008 00               16                                             NOP
+0009 00               17                                             NOP
+000A 00               18                                             NOP
+000B C290             19                                             CLR             SCL
+000D 22               20                                             RET
+                      21     ;;;;;;;;;;;;;;;;;;;;;;;;;
+000E C291             22     STOP:                           CLR             SDA                ;°´ÕÕÊ±Ðò²Ù×÷
+0010 00               23                                             NOP
+0011 D290             24                                             SETB    SCL
+0013 00               25                                             NOP
+0014 00               26                                             NOP
+0015 00               27                                             NOP
+0016 00               28                                             NOP
+0017 D291             29                                             SETB    SDA
+0019 00               30                                             NOP
+001A 00               31                                             NOP
+001B C291             32                                             CLR             SDA
+001D C290             33                                             CLR             SCL
+001F 22               34                                             RET
+                      35     ;;;;;;;;;;;;;;;;;;;;;;;;;
+0020 C290             36     WAITACK:                        CLR             SCL
+0022 D291             37                                             SETB    SDA
+0024 00               38                                             NOP
+0025 00               39                                             NOP
+0026 D290             40                                             SETB    SCL
+0028 00               41                                             NOP
+0029 00               42                                             NOP
+002A 00               43                                             NOP
+002B A291             44                                             MOV             C,SDA
+002D 40F1             45                                             JC              WAITACK          ;SDAÎªµÍµçÆ½ÍË³öÑ­
+                             »·
+002F C291             46                                             CLR             SDA
+0031 C290             47                                             CLR             SCL
+0033 22               48                                             RET
+                      49     ;;;;;;;;;;;;;;;;;;;;;;;;;
+0034 7F08             50     SENDBYTE:                       MOV             R7,#8
+0036 33               51     S_BYTE:                         RLC             A
+0037 9291             52                                             MOV             SDA,C
+0039 D290             53                                             SETB    SCL               ;ÔÚÊ±ÐòÄÚ·¢ËÍ
+003B 00               54                                             NOP
+003C 00               55                                             NOP
+003D 00               56                                             NOP
+003E 00               57                                             NOP
+A51 MACRO ASSEMBLER  FM24C64                                                              07/10/2013 09:53:46 PAGE     2
+
+003F C290             58                                             CLR             SCL
+0041 DFF3             59                                             DJNZ    R7,S_BYTE
+0043 22               60                                             RET
+                      61     ;;;;;;;;;;;;;;;;;;;;;;;;;
+0044 7F08             62     RCVBYTE:                        MOV             R7,#8
+0046 E4               63                                             CLR             A
+0047 D291             64                                             SETB    SDA
+0049 C290             65     R_BYTE:                         CLR             SCL
+004B 00               66                                             NOP
+004C 00               67                                             NOP
+004D 00               68                                             NOP
+004E 00               69                                             NOP
+004F D290             70                                             SETB    SCL
+0051 00               71                                             NOP
+0052 00               72                                             NOP
+0053 00               73                                             NOP
+0054 00               74                                             NOP
+0055 A291             75                                             MOV             C,SDA
+0057 33               76                                             RLC             A
+0058 D291             77                                             SETB    SDA
+005A DFED             78                                             DJNZ    R7,R_BYTE
+005C 22               79                                             RET
+                      80     ;;;;;;;;;;;;;;;;;;;;;;;;;        ÏòÖ¸¶¨µØÖ·Ð´Èë1×Ö½ÚÊ¾Ý×Ó³ÌÐò£¨MTDÎªÊ¾Ý£©
+005D 1100     F       81     WRITE_BYTE:                     ACALL   START
+005F E537             82                                             MOV             A,SLA
+0061 1100     F       83                                             ACALL   SENDBYTE
+0063 1100     F       84                                             ACALL   WAITACK
+0065 E538             85                                             MOV             A,SUBA
+0067 1100     F       86                                             ACALL   SENDBYTE
+0069 1100     F       87                                             ACALL   WAITACK
+006B E539             88                                             MOV             A,MTD
+006D 1100     F       89                                             ACALL   SENDBYTE
+006F 1100     F       90                                             ACALL   WAITACK
+0071 1100     F       91                                             ACALL   STOP
+0073 22               92                                             RET
+                      93     ;;;;;;;;;;;;;;;;;;;;;;;;;
+0074 1100     F       94     READ_BYTE:                      ACALL   START
+0076 E537             95                                             MOV             A,SLA
+0078 1100     F       96                                             ACALL   SENDBYTE
+007A 1100     F       97                                             ACALL   WAITACK
+007C E538             98                                             MOV             A,SUBA
+007E 1100     F       99                                             ACALL   SENDBYTE
+0080 1100     F      100                                             ACALL   WAITACK
+0082 1100     F      101                                             ACALL   START
+0084 0537            102                                             INC             SLA
+0086 E537            103                                             MOV             A,SLA
+0088 1100     F      104                                             ACALL   SENDBYTE
+008A 1100     F      105                                             ACALL   WAITACK
+008C 1100     F      106                                             ACALL   RCVBYTE
+008E 1100     F      107                                             ACALL   STOP
+0090 F53A            108                                             MOV             MRD,A
+0092 22              109                                             RET
+                     110     ;;;;;;;;;;;;;;;;;;;;;;;;;
+                     111             END             
+A51 MACRO ASSEMBLER  FM24C64                                                              07/10/2013 09:53:46 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+CODE_I2C . . . . .  C SEG    0093H       REL=UNIT
+MRD. . . . . . . .  N NUMB   003AH   A   
+MTD. . . . . . . .  N NUMB   0039H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+RCVBYTE. . . . . .  C ADDR   0044H   R   SEG=CODE_I2C
+READ_BYTE. . . . .  C ADDR   0074H   R   SEG=CODE_I2C
+R_BYTE . . . . . .  C ADDR   0049H   R   SEG=CODE_I2C
+SCL. . . . . . . .  B ADDR   0090H.0 A   
+SDA. . . . . . . .  B ADDR   0090H.1 A   
+SENDBYTE . . . . .  C ADDR   0034H   R   SEG=CODE_I2C
+SLA. . . . . . . .  N NUMB   0037H   A   
+START. . . . . . .  C ADDR   0000H   R   SEG=CODE_I2C
+STOP . . . . . . .  C ADDR   000EH   R   SEG=CODE_I2C
+SUBA . . . . . . .  N NUMB   0038H   A   
+S_BYTE . . . . . .  C ADDR   0036H   R   SEG=CODE_I2C
+WAITACK. . . . . .  C ADDR   0020H   R   SEG=CODE_I2C
+WRITE_BYTE . . . .  C ADDR   005DH   R   SEG=CODE_I2C
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

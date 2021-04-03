@@ -1,0 +1,283 @@
+A51 MACRO ASSEMBLER  DS18B20                                                              07/10/2013 09:53:45 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02
+OBJECT MODULE PLACED IN DS18B20.OBJ
+ASSEMBLER INVOKED BY: E:\Program Files\danpianji\Keil\C51\BIN\A51.EXE DS18B20.a51 SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     PUBLIC  HEX_BCD,READ_TEMP
+                       2     CODE_DS18B20    SEGMENT         CODE
+  003B                 3     TEMP_ZH         EQU                     3BH                      ;Êµ¼ÊÎÂ¶ÈÖµ´æ·Åµ¥Ôª£¬ÓÃÀ´º
+                             Í±¨¾¯ÎÂ¶ÈÖµ±È½Ï
+  003C                 4     TEMPL           EQU                     3CH                      ;ÎÂ¶ÈÖµµÍÎ»
+  003D                 5     TEMPH           EQU                     3DH                      ;ÎÂ¶ÈÖµ¸ßÎ»
+  003E                 6     TEMP_TH         EQU                     3EH                      ;¸ßÎÂ±¨¾¯Öµ
+  003F                 7     TEMP_TL         EQU                     3FH                      ;µÍÎÂ±¨¾¯Öµ
+  0000                 8     FLAG            BIT                     20H.0            ;DS18B20ÊÇ·ñ´æÔÚ±ê¼Ç
+  0095                 9     DQ                      BIT                     P1.5             ;DS18B20Ê¾Ý½Å¶¨Òå
+  0040                10     TEMPHC          EQU                     40H                      ;ÎÂ¶È×ª»»µÍ8Î» 
+  0041                11     TEMPLC          EQU                     41H                      ;ÎÂ¶È×ª»»¸ß8Î»
+                      12     ;;;;;;;;;;;;;;;;;;
+----                  13     RSEG    CODE_DS18B20
+                      14     ;;;;;;;;;;;;;;;
+0000                  15     REST_DS18B20:           ;¸´Î»³ÌÐò
+0000 D295             16                                             SETB    DQ
+0002 00               17                                             NOP
+0003 00               18                                             NOP
+0004 C295             19                                             CLR             DQ
+0006 7903             20                                             MOV             R1,#3     ;ÑÓÊ±500us¸´Î»µÍÂö³å
+0008 786B             21     DLY:                            MOV             R0,#107
+000A D8FE             22                                             DJNZ    R0,$
+000C D9FA             23                                             DJNZ    R1,DLY
+000E D295             24                                             SETB    DQ
+0010 00               25                                             NOP
+0011 00               26                                             NOP
+0012 00               27                                             NOP
+0013 7825             28                                             MOV             R0,#25H
+0015 309505           29     RST2:                           JNB             DQ,RST3         ;µÈ´DS18B20»ØÓ¦
+0018 D8FB             30                                             DJNZ    R0,RST2
+001A 020000   F       31                                             LJMP    RST4
+001D D200             32     RST3:                           SETB    FLAG            ;ÖÃ±êÖ¾Î»¡£Ö¤Ã÷DS18B20´æÔÚ
+001F 020000   F       33                                             LJMP    RST5
+0022 C200             34     RST4:                           CLR             FLAG            ;Çå±êÖ¾Î»£¬Ö¤Ã÷DS18B20²»´æÔ
+                             Ú
+0024 020000   F       35                                             LJMP    RST7
+0027 7875             36     RST5:                           MOV             R0,#117
+0029 D8FE             37     RST6:                           DJNZ    R0,RST6
+002B D295             38     RST7:                           SETB    DQ                      ;ÒªÇóÑÓÊ±Ò»¶ÎÊ±¼ä
+002D 22               39                                             RET
+                      40     ;;;;;;;;;;;;;;;
+002E                  41     WRITE_DS18B20:          ;Ð´DS18B20³ÌÐò
+002E 7A08             42                                             MOV             R2,#8
+0030 C3               43                                             CLR             C
+0031 C295             44     WR1:                            CLR             DQ                      ;×ÜÏßµÍÎ»¿ªÊ¼Ð´Èë
+0033 7B06             45                                             MOV             R3,#6
+0035 DBFE             46                                             DJNZ    R3,$            ;±£³Ö16usÊ±¼ä
+0037 13               47                                             RRC             A                       ;°ÑÊ¾Ý´ÓAÖÐ
+                             Ò»Î»Ò»Î»µÄÐ´Èë
+0038 9295             48                                             MOV             DQ,C
+003A 7B17             49                                             MOV             R3,#23
+003C DBFE             50                                             DJNZ    R3,$
+003E D295             51                                             SETB    DQ
+0040 00               52                                             NOP
+0041 DAEE             53                                             DJNZ    R2,WR1
+0043 D295             54                                             SETB    DQ
+0045 22               55                                             RET
+A51 MACRO ASSEMBLER  DS18B20                                                              07/10/2013 09:53:45 PAGE     2
+
+                      56     ;;;;;;;;;;;;;;;         ¶ÁDS18B20Ê¾Ý
+0046 7C04             57     READ_DS18B20:           MOV             R4,#4           ;¶ÁÈ¡4B
+0048 793C             58                                             MOV             R1,#TEMPL       ;´æÈëTEMPL.TEMPH,TE
+                             MP_TH,TEMP_TL
+004A 7A08             59     READ0:                          MOV             R2,#8
+004C C3               60     READ1:                          CLR             C
+004D D295             61                                             SETB    DQ
+004F 00               62                                             NOP
+0050 00               63                                             NOP
+0051 C295             64                                             CLR             DQ                      ;¶ÁÇ°±£³Ö×Ü
+                             ÏßÎªµÍ
+0053 00               65                                             NOP
+0054 00               66                                             NOP
+0055 00               67                                             NOP
+0056 D295             68                                             SETB    DQ                      ;¿ªÊ¼¶Á×ÜÏßÊÍ·Å
+0058 7B09             69                                             MOV             R3,#9
+005A DBFE             70                                             DJNZ    R3,$            ;µÈ´18us
+005C A295             71                                             MOV             C,DQ
+005E 7B17             72                                             MOV             R3,#23
+0060 DBFE             73                                             DJNZ    R3,$            ;µÈ´50us
+0062 13               74                                             RRC             A
+0063 DAE7             75                                             DJNZ    R2,READ1
+0065 F7               76                                             MOV             @R1,A
+0066 09               77                                             INC             R1
+0067 DCE1             78                                             DJNZ    R4,READ0
+0069 22               79                                             RET
+                      80     ;;;;;;;;;;;;;;;Æ¥ÅäROM£¬´«Èë²ÎÊR7         
+006A 7455             81     MATCHROM:                       MOV             A,#55H
+006C 120000   F       82                                             LCALL   WRITE_DS18B20;·¢ËÍÆ¥ÅäROMÖ¸Áî
+006F 7E00             83                                             MOV             R6,#0;Ñ­»·ËÍÈëROMÖµ
+0071 BF010E           84                                             CJNE    R7,#1,MATCH_K1;·¢ËÍµÚÒ»¸öDS18B20
+0074 900000   F       85                                             MOV             DPTR,#DS18B20_1
+0077 EE               86     MATCH1:                         MOV             A,R6
+0078 93               87                                             MOVC    A,@A+DPTR
+0079 120000   F       88                                             LCALL   WRITE_DS18B20
+007C 0E               89                                             INC             R6
+007D BE08F7           90                                             CJNE    R6,#8,MATCH1
+0080 0100     F       91                                             AJMP    MATCHROM_END
+                      92                                             ;;;;;;
+0082 BF020C           93     MATCH_K1:                       CJNE    R7,#2,MATCHROM_END;·¢ËÍµÚ¶þ¸öDS18B20
+0085 900000   F       94                                             MOV             DPTR,#DS18B20_2
+0088 EE               95     MATCH2:                         MOV             A,R6
+0089 93               96                                             MOVC    A,@A+DPTR
+008A 120000   F       97                                             LCALL   WRITE_DS18B20
+008D 0E               98                                             INC             R6
+008E BE08F7           99                                             CJNE    R6,#8,MATCH2
+                     100                                             ;;;;;;
+0091 22              101     MATCHROM_END:           RET             
+                     102     ;;;;;;;;;;;;;;;¶ÁÈ¡ÎÂ¶È²¢×ª»»£¬¶ÁÄÄ¸öÎÂ¶È¼ÆÓÉR7¾ö¶¨
+0092 D295            103     READ_TEMP:                      SETB    DQ
+0094 120000   F      104                                             LCALL   REST_DS18B20
+0097 120000   F      105                                             LCALL   MATCHROM ;Æ¥ÅäROM
+009A 7444            106                                             MOV             A,#44H
+009C 120000   F      107                                             LCALL   WRITE_DS18B20
+                     108                                             ;;;;;
+009F 7DE2            109                                             MOV             R5,#0E2H
+00A1 7EFF            110     LOPREA0:                        MOV             R6,#0FFH
+00A3 00              111     LOPREA1:                        NOP
+00A4 DEFD            112                                             DJNZ    R6,LOPREA1
+00A6 DDF9            113                                             DJNZ    R5,LOPREA0        
+                     114                                             ;;;;;;ÖØÒªµÄÑÓÊ±750ms,²»ÒªÒ²¿ÉÒÔ£¬µ«ÊÇÒª×¢Òâ
+                     115     
+00A8 120000   F      116                                             LCALL   REST_DS18B20
+00AB 120000   F      117                                             LCALL   MATCHROM  ;Æ¥ÅäROM
+00AE 74BE            118                                             MOV             A,#0BEH
+00B0 120000   F      119                                             LCALL   WRITE_DS18B20
+A51 MACRO ASSEMBLER  DS18B20                                                              07/10/2013 09:53:45 PAGE     3
+
+00B3 120000   F      120                                             LCALL   READ_DS18B20
+                     121                                             ;;;;;
+                     122                                             ;ÎÂ¶È×ª»»³ÌÐò¶Î
+                     123                                             ;;;;;
+00B6 E53D            124                                             MOV             A,TEMPH                  ;ÅÐ¶ÏÎÂ¶ÈÊ
+                             Ç·ñÁãÏÂ
+00B8 5480            125                                             ANL             A,#80H
+00BA 6014            126                                             JZ              TC1                              ;È
+                             ôAÎª0ÔòÎÂ¶ÈÎªÁãÉÏ
+00BC C3              127                                             CLR             C
+00BD E53C            128                                             MOV             A,TEMPL
+00BF F4              129                                             CPL             A
+00C0 2401            130                                             ADD             A,#1
+00C2 F53C            131                                             MOV             TEMPL,A
+00C4 E53D            132                                             MOV             A,TEMPH
+00C6 F4              133                                             CPL             A
+00C7 3400            134                                             ADDC    A,#0
+00C9 F53D            135                                             MOV             TEMPH,A
+00CB 754000          136                                             MOV             TEMPHC,#0
+00CE 8003            137                                             SJMP    TC2
+00D0 75400A          138     TC1:                            MOV             TEMPHC,#0AH             ;Èç¹ûÎÂ¶ÈÎªÕÊÔò¸ß4Î
+                             »ÎªA
+00D3 E540            139     TC2:                            MOV             A,TEMPHC
+00D5 C4              140                                             SWAP    A
+00D6 F540            141                                             MOV             TEMPHC,A
+00D8 E53C            142                                             MOV             A,TEMPL                  ;ÎÂ¶ÈÖµµÍ×
+                             Ö½ÚËÍA
+00DA 540F            143                                             ANL             A,#0FH
+00DC 900000   F      144                                             MOV             DPTR,#DOTTAB
+00DF 93              145                                             MOVC    A,@A+DPTR                ;²é³öÐ¡Ê
+00E0 F541            146                                             MOV             TEMPLC,A                 ;Ð¡Ê²¿·ÖËÍ
+                             TEMPLC
+00E2 E53C            147                                             MOV             A,TEMPL
+00E4 54F0            148                                             ANL             A,#0F0H
+00E6 C4              149                                             SWAP    A
+00E7 F53C            150                                             MOV             TEMPL,A
+00E9 E53D            151                                             MOV             A,TEMPH
+00EB 540F            152                                             ANL             A,#0FH
+00ED C4              153                                             SWAP    A
+00EE 453C            154                                             ORL             A,TEMPL
+00F0 F53B            155                                             MOV             TEMP_ZH,A               ;½«×éºÏºóµÄ
+                             ÖµËÍTEMP_ZH£¨Êµ¼ÊÎÂ¶ÈÖµ£©
+00F2 120000   F      156                                             LCALL   HEX_BCD                 ;µ÷Ê®Áù½øÖÆ×ª»»BCDÂ
+                             ë³ÌÐò
+00F5 F53C            157                                             MOV             TEMPL,A                 ;
+00F7 54F0            158                                             ANL             A,#0F0H
+00F9 C4              159                                             SWAP    A
+00FA 4540            160                                             ORL             A,TEMPHC
+00FC F540            161                                             MOV             TEMPHC,A
+00FE E53C            162                                             MOV             A,TEMPL
+0100 540F            163                                             ANL             A,#0FH
+0102 C4              164                                             SWAP    A
+0103 4541            165                                             ORL             A,TEMPLC
+0105 F541            166                                             MOV             TEMPLC,A
+0107 EE              167                                             MOV             A,R6
+0108 600B            168                                             JZ              TC3                             ;Èô
+                             AÎª0ÔòÍË³ö
+010A 540F            169                                             ANL             A,#0FH
+010C C4              170                                             SWAP    A
+010D FE              171                                             MOV             R6,A
+010E E540            172                                             MOV             A,TEMPHC
+0110 540F            173                                             ANL             A,#0FH
+0112 4E              174                                             ORL             A,R6
+0113 F540            175                                             MOV             TEMPHC,A
+                     176     ;;;;;;;;´ËÊ±TEMP_ZHÊÇÊ®Î»ºÍ¸öÎ»µÄ×éºÏ
+                     177     ;;;;;;;;TEMPHCÎª°ÙÎ»Ê®Î»£¬Èô°ÙÎ»Ã»ÓÐÖµÔò°ÙÎ»ÎªA
+A51 MACRO ASSEMBLER  DS18B20                                                              07/10/2013 09:53:45 PAGE     4
+
+                     178     ;;;;;;;;TEMPLCÎª¸öÎ»ºÍÐ¡ÊÎ»µÄ×éºÏ
+0115 22              179     TC3:                            RET
+                     180     ;;;;;;;;;;;;;;;;;;;Ð¡Ê²¿·ÖÂë±í
+0116 00010102        181     DOTTAB: DB      00H,01H,01H,02H,03H,03H,04H,04H,05H,06H
+011A 03030404                
+011E 0506                    
+0120 06070808        182                     DB      06H,07H,08H,08H,09H,09H
+0124 0909                    
+                     183     ;;;;;;;;;;;;;;;;;;;;Ê®Áù½øÖÆ×ª»»BCDÂë³ÌÐò
+0126 75F064          184     HEX_BCD:                        MOV             B,#100
+0129 84              185                                             DIV             AB
+012A FE              186                                             MOV             R6,A
+012B 740A            187                                             MOV             A,#10
+012D C5F0            188                                             XCH             A,B
+012F 84              189                                             DIV             AB
+0130 C4              190                                             SWAP    A
+0131 45F0            191                                             ORL             A,B
+0133 22              192                                             RET
+                     193     ;;;;;;;;;;;;;;;
+0134 2830C5B8        194     DS18B20_1: DB   28H,30H,0C5H,0B8H,00H,00H,00H,8EH;ROM1(B8C530)
+0138 0000008E                
+013C 2831C5B8        195     DS18B20_2: DB   28H,31H,0C5H,0B8H,00H,00H,00H,0B9H;ROM2(B8C531)
+0140 000000B9                
+                     196             END
+A51 MACRO ASSEMBLER  DS18B20                                                              07/10/2013 09:53:45 PAGE     5
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+B. . . . . . . . .  D ADDR   00F0H   A   
+CODE_DS18B20 . . .  C SEG    0144H       REL=UNIT
+DLY. . . . . . . .  C ADDR   0008H   R   SEG=CODE_DS18B20
+DOTTAB . . . . . .  C ADDR   0116H   R   SEG=CODE_DS18B20
+DQ . . . . . . . .  B ADDR   0090H.5 A   
+DS18B20_1. . . . .  C ADDR   0134H   R   SEG=CODE_DS18B20
+DS18B20_2. . . . .  C ADDR   013CH   R   SEG=CODE_DS18B20
+FLAG . . . . . . .  B ADDR   0020H.0 A   
+HEX_BCD. . . . . .  C ADDR   0126H   R   SEG=CODE_DS18B20
+LOPREA0. . . . . .  C ADDR   00A1H   R   SEG=CODE_DS18B20
+LOPREA1. . . . . .  C ADDR   00A3H   R   SEG=CODE_DS18B20
+MATCH1 . . . . . .  C ADDR   0077H   R   SEG=CODE_DS18B20
+MATCH2 . . . . . .  C ADDR   0088H   R   SEG=CODE_DS18B20
+MATCHROM . . . . .  C ADDR   006AH   R   SEG=CODE_DS18B20
+MATCHROM_END . . .  C ADDR   0091H   R   SEG=CODE_DS18B20
+MATCH_K1 . . . . .  C ADDR   0082H   R   SEG=CODE_DS18B20
+P1 . . . . . . . .  D ADDR   0090H   A   
+READ0. . . . . . .  C ADDR   004AH   R   SEG=CODE_DS18B20
+READ1. . . . . . .  C ADDR   004CH   R   SEG=CODE_DS18B20
+READ_DS18B20 . . .  C ADDR   0046H   R   SEG=CODE_DS18B20
+READ_TEMP. . . . .  C ADDR   0092H   R   SEG=CODE_DS18B20
+REST_DS18B20 . . .  C ADDR   0000H   R   SEG=CODE_DS18B20
+RST2 . . . . . . .  C ADDR   0015H   R   SEG=CODE_DS18B20
+RST3 . . . . . . .  C ADDR   001DH   R   SEG=CODE_DS18B20
+RST4 . . . . . . .  C ADDR   0022H   R   SEG=CODE_DS18B20
+RST5 . . . . . . .  C ADDR   0027H   R   SEG=CODE_DS18B20
+RST6 . . . . . . .  C ADDR   0029H   R   SEG=CODE_DS18B20
+RST7 . . . . . . .  C ADDR   002BH   R   SEG=CODE_DS18B20
+TC1. . . . . . . .  C ADDR   00D0H   R   SEG=CODE_DS18B20
+TC2. . . . . . . .  C ADDR   00D3H   R   SEG=CODE_DS18B20
+TC3. . . . . . . .  C ADDR   0115H   R   SEG=CODE_DS18B20
+TEMPH. . . . . . .  N NUMB   003DH   A   
+TEMPHC . . . . . .  N NUMB   0040H   A   
+TEMPL. . . . . . .  N NUMB   003CH   A   
+TEMPLC . . . . . .  N NUMB   0041H   A   
+TEMP_TH. . . . . .  N NUMB   003EH   A   
+TEMP_TL. . . . . .  N NUMB   003FH   A   
+TEMP_ZH. . . . . .  N NUMB   003BH   A   
+WR1. . . . . . . .  C ADDR   0031H   R   SEG=CODE_DS18B20
+WRITE_DS18B20. . .  C ADDR   002EH   R   SEG=CODE_DS18B20
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

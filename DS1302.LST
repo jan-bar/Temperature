@@ -1,0 +1,234 @@
+A51 MACRO ASSEMBLER  DS1302                                                               07/10/2013 09:53:46 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02
+OBJECT MODULE PLACED IN DS1302.OBJ
+ASSEMBLER INVOKED BY: E:\Program Files\danpianji\Keil\C51\BIN\A51.EXE DS1302.a51 SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     PUBLIC DS1302_INIT,SET1302,GET1302,WRITE1302,READ1302
+                       2     ;;;;;;;;;;;;;;;;;;;;;;;;;
+                       3     CODE_DS1302 SEGMENT CODE
+  0093                 4     T_CLK           BIT P1.3
+  0094                 5     T_IO            BIT P1.4
+  0092                 6     T_RST           BIT P1.2
+  0030                 7     SECOND          EQU 30H
+  0031                 8     MINUTE          EQU 31H
+  0032                 9     HOUR            EQU 32H
+  0033                10     DAY                     EQU 33H
+  0034                11     MONTH           EQU 34H
+  0035                12     WEEK            EQU 35H
+  0036                13     YEAR            EQU 36H
+                      14     ;;;;;;;;;;;;;;;
+----                  15     RSEG CODE_DS1302
+                      16     ;;;;;;;;;;;;;;
+0000 C293             17     DS1302_INIT:            CLR             T_CLK
+0002 C292             18                                             CLR             T_RST
+0004 00               19                                             NOP
+0005 00               20                                             NOP
+0006 D292             21                                             SETB    T_RST              ;复位操作
+0008 7980             22                                             MOV     R1,#80H            ;写秒寄存器
+000A 7800             23                                             MOV     R0,#00H            ;启动振荡器
+000C 120000   F       24                                             LCALL   WRITE1302
+000F 7990             25                                             MOV     R1,#90H            ;写充电寄存器
+0011 78AB             26                                             MOV     R0,#0ABH           ;使TCS为1010，DS为10，RS
+                             为11
+0013 120000   F       27                                             LCALL   WRITE1302 
+0016 22               28                                             RET
+                      29     ;;;;;;;;;;;;;;
+0017 7981             30     GET1302:                        MOV     R1,#81H
+0019 120000   F       31                                             LCALL   READ1302
+001C 8830             32                                             MOV             SECOND,R0
+                      33                                             ;;;;;;;;;;;
+001E 7983             34                                             MOV     R1,#83H
+0020 120000   F       35                                             LCALL   READ1302
+0023 8831             36                                             MOV             MINUTE,R0
+                      37                                             ;;;;;;;;;;;
+0025 7985             38                                             MOV     R1,#85H
+0027 120000   F       39                                             LCALL   READ1302
+002A 8832             40                                             MOV             HOUR,R0
+                      41                                             ;;;;;;;;;;;
+002C 7987             42                                             MOV     R1,#87H
+002E 120000   F       43                                             LCALL   READ1302
+0031 8833             44                                             MOV             DAY,R0
+                      45                                             ;;;;;;;;;;;
+0033 7989             46                                             MOV     R1,#89H
+0035 120000   F       47                                             LCALL   READ1302
+0038 8834             48                                             MOV             MONTH,R0
+                      49                                             ;;;;;;;;;;;
+003A 798B             50                                             MOV     R1,#8BH
+003C 120000   F       51                                             LCALL   READ1302
+003F 8835             52                                             MOV             WEEK,R0
+                      53                                             ;;;;;;;;;;;
+0041 798D             54                                             MOV     R1,#8DH
+0043 120000   F       55                                             LCALL   READ1302
+0046 8836             56                                             MOV             YEAR,R0
+                      57                                             ;;;;;;;;;;;
+A51 MACRO ASSEMBLER  DS1302                                                               07/10/2013 09:53:46 PAGE     2
+
+0048 22               58                                             RET
+                      59     ;;;;;;;;;;;;;;
+0049 7980             60     SET1302:                        MOV     R1,#80H  
+004B A830             61                                             MOV             R0,SECOND
+004D 120000   F       62                                             LCALL   WRITE1302                                  
+                                  
+                      63                                             ;;;;;;;;;;;
+0050 7982             64                                             MOV     R1,#82H 
+0052 A831             65                                             MOV             R0,MINUTE
+0054 120000   F       66                                             LCALL   WRITE1302                                  
+                                  
+                      67                                             ;;;;;;;;;;;
+0057 7984             68                                             MOV     R1,#84H 
+0059 A832             69                                             MOV             R0,HOUR
+005B 120000   F       70                                             LCALL   WRITE1302                                  
+                                  
+                      71                                             ;;;;;;;;;;;
+005E 7986             72                                             MOV     R1,#86H    
+0060 A833             73                                             MOV             R0,DAY
+0062 120000   F       74                                             LCALL   WRITE1302                       
+                      75                                             ;;;;;;;;;;;
+0065 7988             76                                             MOV     R1,#88H         
+0067 A834             77                                             MOV             R0,MONTH
+0069 120000   F       78                                             LCALL   WRITE1302       
+                      79                                             ;;;;;;;;;;;
+006C 798A             80                                             MOV     R1,#8AH  
+006E A835             81                                             MOV             R0,WEEK
+0070 120000   F       82                                             LCALL   WRITE1302
+                      83                                             ;;;;;;;;;;;
+0073 798C             84                                             MOV     R1,#8CH   
+0075 A836             85                                             MOV             R0,YEAR
+0077 120000   F       86                                             LCALL   WRITE1302       
+                      87                                             ;;;;;;;;;;;
+007A 22               88                                             RET
+                      89     ;;;;;;;;;;;;;;以下为写地址和寄存器，R1内容为地址，R0为寄存器内容
+007B C293             90     WRITE1302:                      CLR             T_CLK
+007D 00               91                                             NOP
+007E 00               92                                             NOP
+007F D292             93                                             SETB    T_RST
+0081 00               94                                             NOP
+0082 E9               95                                             MOV     A,R1
+0083 7A08             96                                             MOV     R2,#8
+0085 13               97     WRI_0:                          RRC             A               ;使一位一位的进入进位位C
+0086 00               98                                             NOP
+0087 00               99                                             NOP
+0088 C293            100                                             CLR     T_CLK
+008A 00              101                                             NOP
+008B 00              102                                             NOP
+008C 9294            103                                             MOV     T_IO,C
+008E 00              104                                             NOP
+008F 00              105                                             NOP
+0090 D293            106                                             SETB    T_CLK
+0092 00              107                                             NOP
+0093 00              108                                             NOP
+0094 DAEF            109                                             DJNZ    R2,WRI_0
+0096 C293            110                                             CLR             T_CLK
+0098 00              111                                             NOP
+0099 00              112                                             NOP
+009A E8              113                                             MOV     A,R0
+009B 7A08            114                                             MOV     R2,#8
+009D 13              115     WRI_1:                          RRC             A
+009E 00              116                                             NOP
+009F 00              117                                             NOP
+00A0 C293            118                                             CLR     T_CLK
+00A2 00              119                                             NOP
+00A3 00              120                                             NOP
+A51 MACRO ASSEMBLER  DS1302                                                               07/10/2013 09:53:46 PAGE     3
+
+00A4 9294            121                                             MOV             T_IO,C
+00A6 00              122                                             NOP
+00A7 00              123                                             NOP
+00A8 D293            124                                             SETB    T_CLK
+00AA 00              125                                             NOP
+00AB 00              126                                             NOP
+00AC DAEF            127                                             DJNZ    R2,WRI_1
+00AE C293            128                                             CLR             T_CLK
+00B0 00              129                                             NOP
+00B1 00              130                                             NOP
+00B2 C292            131                                             CLR             T_RST
+00B4 00              132                                             NOP
+00B5 00              133                                             NOP
+00B6 22              134                                             RET
+                     135     ;;;;;;;;;;;;;;
+00B7 C293            136     READ1302:                       CLR             T_CLK
+00B9 00              137                                             NOP
+00BA 00              138                                             NOP
+00BB D292            139                                             SETB    T_RST
+00BD 00              140                                             NOP
+00BE 00              141                                             NOP
+00BF E9              142                                             MOV     A,R1    ;写地址
+00C0 7A08            143                                             MOV     R2,#8
+00C2 13              144     REA_0:                          RRC             A               ;使一位一位的进入进位位C
+00C3 00              145                                             NOP
+00C4 00              146                                             NOP
+00C5 C293            147                                             CLR     T_CLK
+00C7 00              148                                             NOP
+00C8 00              149                                             NOP
+00C9 9294            150                                             MOV     T_IO,C
+00CB 00              151                                             NOP
+00CC 00              152                                             NOP
+00CD D293            153                                             SETB    T_CLK
+00CF 00              154                                             NOP
+00D0 00              155                                             NOP
+00D1 DAEF            156                                             DJNZ    R2,REA_0
+00D3 00              157                                             NOP
+00D4 00              158                                             NOP
+00D5 D294            159                                             SETB    T_IO
+00D7 E4              160                                             CLR             A               ;清寄存器
+00D8 C3              161                                             CLR             C
+00D9 7A08            162                                             MOV     R2,#8
+00DB C293            163     REA_1:                          CLR     T_CLK
+00DD 00              164                                             NOP
+00DE 00              165                                             NOP
+00DF A294            166                                             MOV             C,T_IO
+00E1 00              167                                             NOP
+00E2 00              168                                             NOP
+00E3 13              169                                             RRC             A                ;读内容
+00E4 00              170                                             NOP
+00E5 00              171                                             NOP
+00E6 D293            172                                             SETB    T_CLK
+00E8 00              173                                             NOP
+00E9 00              174                                             NOP
+00EA DAEF            175                                             DJNZ    R2,REA_1
+00EC F8              176                                             MOV             R0,A
+00ED C292            177                                             CLR             T_RST
+00EF 00              178                                             NOP
+00F0 00              179                                             NOP
+00F1 22              180                                             RET
+                     181     ;;;;;;;;;;;;;;;
+                     182             END
+A51 MACRO ASSEMBLER  DS1302                                                               07/10/2013 09:53:46 PAGE     4
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+CODE_DS1302. . . .  C SEG    00F2H       REL=UNIT
+DAY. . . . . . . .  N NUMB   0033H   A   
+DS1302_INIT. . . .  C ADDR   0000H   R   SEG=CODE_DS1302
+GET1302. . . . . .  C ADDR   0017H   R   SEG=CODE_DS1302
+HOUR . . . . . . .  N NUMB   0032H   A   
+MINUTE . . . . . .  N NUMB   0031H   A   
+MONTH. . . . . . .  N NUMB   0034H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+READ1302 . . . . .  C ADDR   00B7H   R   SEG=CODE_DS1302
+REA_0. . . . . . .  C ADDR   00C2H   R   SEG=CODE_DS1302
+REA_1. . . . . . .  C ADDR   00DBH   R   SEG=CODE_DS1302
+SECOND . . . . . .  N NUMB   0030H   A   
+SET1302. . . . . .  C ADDR   0049H   R   SEG=CODE_DS1302
+T_CLK. . . . . . .  B ADDR   0090H.3 A   
+T_IO . . . . . . .  B ADDR   0090H.4 A   
+T_RST. . . . . . .  B ADDR   0090H.2 A   
+WEEK . . . . . . .  N NUMB   0035H   A   
+WRITE1302. . . . .  C ADDR   007BH   R   SEG=CODE_DS1302
+WRI_0. . . . . . .  C ADDR   0085H   R   SEG=CODE_DS1302
+WRI_1. . . . . . .  C ADDR   009DH   R   SEG=CODE_DS1302
+YEAR . . . . . . .  N NUMB   0036H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)
